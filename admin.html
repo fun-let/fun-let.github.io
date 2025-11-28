@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FUNLET 관리자 페이지</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { background: #111; color: white; font-family: 'Noto Sans KR'; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { width: 400px; background: #222; padding: 30px; border-radius: 20px; box-shadow: 0 0 20px rgba(0,255,157,0.2); border: 1px solid #333; }
+        h2 { text-align: center; color: #00ff9d; margin-bottom: 30px; }
+        
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #ccc; }
+        input, select { width: 100%; padding: 12px; background: #333; border: 1px solid #444; color: white; border-radius: 8px; box-sizing: border-box; }
+        
+        button { width: 100%; padding: 15px; background: #00ff9d; color: black; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; margin-top: 10px; }
+        button:hover { background: #00cc7d; }
+        
+        .status { margin-top: 20px; padding: 15px; background: #333; border-radius: 8px; font-size: 0.9rem; color: #aaa; word-break: break-all; display: none; }
+        .preview { margin-top: 20px; text-align: center; }
+        .preview img { max-width: 100%; border-radius: 10px; display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>🔧 FUNLET 관리자</h2>
+
+        <div class="form-group">
+            <label>1. 관리자 토큰 (Key)</label>
+            <input type="password" id="token" placeholder="ghp_..." onchange="saveToken()">
+        </div>
+
+        <div class="form-group">
+            <label>2. 업로드 위치 선택</label>
+            <select id="folder">
+                <option value="images/thumbnails/">게임 썸네일 (images/thumbnails/)</option>
+                <option value="images/pet-gacha/">펫 가챠 이미지 (images/pet-gacha/)</option>
+                <option value="images/sky-jump/">스카이 점프 이미지 (images/sky-jump/)</option>
+                <option value="images/">기타 배너/배경 (images/)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>3. 파일 선택</label>
+            <input type="file" id="fileInput" accept="image/*">
+        </div>
+
+        <div class="form-group">
+            <label>4. 저장될 파일명 (자동 입력)</label>
+            <input type="text" id="fileName" placeholder="예: dog.png">
+        </div>
+
+        <div class="preview">
+            <img id="previewImg" src="">
+        </div>
+
+        <button onclick="uploadImage()" id="uploadBtn">이미지 업로드 하기</button>
+        
+        <div class="status" id="statusBox">대기 중...</div>
+    </div>
+
+    <script>
+        // 설정: 사장님의 아이디와 저장소 이름
+        const USER = 'fun-let';
+        const REPO = 'funlet';
+
+        // 토큰 자동 저장/불러오기 (매번 입력 안 해도 됨)
+        window.onload = () => {
+            const savedToken = localStorage.getItem('github_token');
+            if(savedToken) document.getElementById('token').value = savedToken;
+        }
+        function saveToken() {
+            localStorage.setItem('github_token', document.getElementById('token').value);
+        }
+
+        // 파일 선택 시 미리보기 & 이름 자동 입력
+        const fileInput = document.getElementById('fileInput');
+        fileInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if(file) {
+                document.getElementById('fileName').value = file.name;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('previewImg').src = e.target.result;
+                    document.getElementById('previewImg').style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // 업로드 함수
+        async function uploadImage() {
+            const token = document.getElementById('token').value;
+            const folder = document.getElementById('folder').value;
+            const file = fileInput.files[0];
+            const fileName = document.getElementById('fileName').value;
+            const statusBox = document.getElementById('statusBox');
+            const btn = document.getElementById('uploadBtn');
+
+            if (!token || !file || !fileName) {
+                alert("토큰과 파일을 모두 확인해주세요.");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "업로드 중...";
+            statusBox.style.display = 'block';
+            statusBox.innerText = "GitHub 창고로 전송 중...";
+
+            // 파일을 Base64로 변환
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = async function() {
+                const content = reader.result.split(',')[1]; // Base64 데이터만 추출
+
+                const url = `https://api.github.com/repos/${USER}/${REPO}/contents/${folder}${fileName}`;
+                
+                // 기존 파일이 있는지 확인 (덮어쓰기 위해 sha 값 필요)
+                let sha = null;
+                try {
+                    const check = await fetch(url, { headers: { Authorization: `token ${token}` } });
+                    if(check.ok) {
+                        const data = await check.json();
+                        sha = data.sha;
+                    }
+                } catch(e) {}
+
+                // 업로드 요청
+                const bodyData = {
+                    message: `Upload ${fileName} via Admin`,
+                    content: content
+                };
+                if(sha) bodyData.sha = sha; // 덮어쓰기인 경우
+
+                try {
+                    const response = await fetch(url, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `token ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(bodyData)
+                    });
+
+                    if (response.ok) {
+                        const resData = await response.json();
+                        const fileUrl = resData.content.download_url; // 실제 이미지 주소
+                        statusBox.innerHTML = `✅ 성공!<br>주소 복사해서 쓰세요:<br><b style="color:#00ff9d; user-select:all;">./${folder}${fileName}</b>`;
+                        alert("업로드 성공! 약 1~2분 뒤에 적용됩니다.");
+                    } else {
+                        const err = await response.json();
+                        statusBox.innerText = "❌ 실패: " + err.message;
+                    }
+                } catch (error) {
+                    statusBox.innerText = "❌ 오류 발생: " + error;
+                }
+                
+                btn.disabled = false;
+                btn.innerText = "이미지 업로드 하기";
+            };
+        }
+    </script>
+</body>
+</html>
