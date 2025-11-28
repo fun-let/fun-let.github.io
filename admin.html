@@ -73,9 +73,10 @@
         const REPO = 'funlet';
         let currentMode = 'overwrite';
 
-        // [핵심] 위치별 고정 파일명 규칙 (여기만 수정하면 됨)
+// [수정된 프리셋 목록] 메인 타이틀 배경이 추가되었습니다.
         const PRESETS = {
             'images/': [
+                { name: '메인 타이틀 배경 (Hero)', file: 'bg_hero.png' },  // 👈 새로 추가됨!
                 { name: '메인 상단 배너 (PC)', file: 'banner_main_pc.png' },
                 { name: '사이드바 배너', file: 'banner_sidebar.png' },
                 { name: '게임 공통 하단 배너', file: 'banner_game_bottom.png' }
@@ -84,6 +85,13 @@
                 { name: '머니 타이쿤 썸네일', file: 'money_tycoon_thumb.jpg' },
                 { name: '펫 가챠 썸네일', file: 'pet_gacha_thumb.jpg' },
                 { name: '스카이 점프 썸네일', file: 'sky_thumb.jpg' }
+            ],
+            // 펫 가챠, 스카이 점프 이미지는 기존 파일명 그대로 유지하거나 필요하면 추가하세요.
+            'images/pet-gacha/': [
+                 { name: '알 이미지', file: 'egg.png' }
+            ],
+            'images/sky-jump/': [
+                 { name: '캐릭터', file: 'player.png' }
             ]
         };
 
