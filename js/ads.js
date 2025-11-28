@@ -1,12 +1,15 @@
-// [Funlet 광고 & 이미지 통합 관리 시스템 V3]
-// 이제 관리자 페이지에서 이미지만 덮어쓰면 자동으로 바뀝니다.
+// [Funlet 광고 & 이미지 통합 관리 시스템 V4]
+// 히어로 배경 이미지까지 관리자가 제어합니다.
 
-// 캐시 방지용 코드 (이미지 변경 시 즉시 반영되게 함)
-const version = new Date().getTime(); 
+const version = new Date().getTime(); // 캐시 방지용
 
 const AD_SETTINGS = {
+    // 0. 메인 타이틀 배경 (Hero Section)
+    hero: {
+        image: `https://fun-let.github.io/funlet/images/bg_hero.png?v=${version}`
+    },
+
     // 1. 메인 상단 가로 배너 (PC)
-    // 관리자 페이지에서 '메인 상단 배너 (PC)'로 업로드하면 여기로 들어갑니다.
     mainTop: {
         image: `https://fun-let.github.io/funlet/images/banner_main_pc.png?v=${version}`,
         link: "https://www.google.com"
@@ -25,7 +28,6 @@ const AD_SETTINGS = {
     }
 };
 
-// --- 광고 로더 (변경 없음, 그대로 둠) ---
 function loadAds() {
     const placeholderHTML = `
         <div style="width:100%; height:100%; background: linear-gradient(45deg, #1a1a2e, #16213e); display:flex; flex-direction:column; align-items:center; justify-content:center; color:#666; font-family:'Noto Sans KR'; text-align:center; border: 1px dashed #333;">
@@ -35,6 +37,18 @@ function loadAds() {
         </div>
     `;
 
+    // [추가됨] 히어로 배경 이미지 적용 로직
+    const heroSection = document.getElementById('hero-section');
+    if (heroSection) {
+        // 이미지가 실제로 존재하는지 확인 후 적용 (없으면 CSS 기본값 유지)
+        const img = new Image();
+        img.src = AD_SETTINGS.hero.image;
+        img.onload = function() {
+            heroSection.style.backgroundImage = `url('${AD_SETTINGS.hero.image}')`;
+        };
+    }
+
+    // 광고 배너 적용 로직
     function injectAd(elementId, adData, fitStyle) {
         const container = document.getElementById(elementId);
         if (!container) return;
