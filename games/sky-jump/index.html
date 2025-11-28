@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sky Jump V4 - Mobile Fix</title>
+    <title>Sky Jump V5 - Fixed</title>
     <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -11,50 +11,41 @@
             margin: 0; padding: 0; background: #111; overflow: hidden; 
             font-family: 'Black Han Sans', sans-serif; touch-action: none;
             display: flex; justify-content: center; align-items: center; 
-            height: 100vh; /* 기본 높이 */
-            height: 100dvh; /* 모바일 브라우저 대응 높이 */
+            height: 100vh; height: 100dvh;
         }
-        
         #gameContainer {
             position: relative; width: 100%; max-width: 500px;
-            height: 100%; /* 화면 꽉 채우기 */
-            background: #222; overflow: hidden;
+            height: 100%; background: #222; overflow: hidden;
         }
-
         #gameCanvas { display: block; width: 100%; height: 100%; }
-
         .ui-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none;
-            display: flex; flex-direction: column; justify-content: space-between;
-            z-index: 10;
+            pointer-events: none; /* UI 레이어는 터치 통과 */
+            display: flex; flex-direction: column; justify-content: space-between; z-index: 10;
         }
-
-        .score-board {
-            text-align: center; padding-top: 10px; pointer-events: none;
-        }
+        .score-board { text-align: center; padding-top: 10px; pointer-events: none; }
         #scoreDisplay { font-size: 3rem; color: #FFD700; text-shadow: 2px 2px 0 #000; margin: 0; }
         .best-score { font-size: 1rem; color: #fff; background: rgba(0,0,0,0.5); padding: 5px 15px; border-radius: 20px; }
-
-        /* 시작/게임오버 화면 */
+        
+        /* 시작/게임오버 화면 (z-index를 높여서 최상단에 배치) */
         #startScreen, #gameOverScreen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            pointer-events: auto; z-index: 20; text-align: center; color: white;
+            pointer-events: auto; /* 여기는 터치 가능해야 함 */
+            z-index: 50; text-align: center; color: white;
         }
         
         .btn {
             background: #00ff9d; color: black; border: none; padding: 15px 40px;
             font-size: 1.5rem; border-radius: 50px; cursor: pointer;
             font-family: 'Black Han Sans'; margin-top: 20px;
-            box-shadow: 0 5px 0 #00b870;
+            box-shadow: 0 5px 0 #00b870; touch-action: manipulation;
         }
         
         .ad-area {
             pointer-events: auto; width: 320px; height: 100px; margin: 0 auto 10px auto;
-            /* 배너가 너무 바닥에 붙지 않게 */
-            position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
+            position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); z-index: 20;
         }
 
         .controls-hint {
@@ -74,17 +65,15 @@
                 <p id="scoreDisplay">0</p>
                 <span class="best-score">BEST: <span id="bestDisplay">0</span></span>
             </div>
-            
             <div class="controls-hint" id="controlsHint">
                 <span>👈 L</span><span>R 👉</span>
             </div>
-            
             <div class="ad-area" id="ad-game-bottom"></div>
         </div>
 
         <div id="startScreen">
             <h1 style="font-size:3rem; margin:0; color:#00ff9d;">SKY JUMP</h1>
-            <p>모바일: 화면 좌우 터치<br>PC: 방향키</p>
+            <p>모바일: 좌우 터치<br>PC: 방향키</p>
             <button class="btn" onclick="startGame()">START</button>
         </div>
 
@@ -102,27 +91,20 @@
     <script src="../../js/ads.js"></script>
 
     <script>
-        // 모바일 캔버스 사이즈 최적화
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        
-        // 게임 내부 로직 해상도 (비율 고정)
         const GAME_WIDTH = 500;
         const GAME_HEIGHT = 900;
         
-        // 캔버스 크기 조정 함수
         function resizeCanvas() {
-            // 실제 화면 크기에 맞춰서 캔버스 스타일 조정 (꽉 차게)
             canvas.style.width = '100%';
             canvas.style.height = '100%';
-            // 내부 해상도는 고정
             canvas.width = GAME_WIDTH;
             canvas.height = GAME_HEIGHT;
         }
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
-        // 이미지 로드 (기존과 동일)
         const imgPlayer = new Image(); imgPlayer.src = "../../images/sky-jump/player.png";
         const imgPlatform = new Image(); imgPlatform.src = "../../images/sky-jump/platform.png";
         const imgStar = new Image(); imgStar.src = "../../images/sky-jump/star.png";
@@ -133,7 +115,6 @@
             const img = new Image(); img.src = `../../images/sky-jump/${src}`; bgImages.push(img);
         });
 
-        // ... (나머지 게임 로직 변수들 기존과 동일) ...
         let gameLoop;
         let score = 0;
         let bestScore = localStorage.getItem('skyJumpBestV3') || 0;
@@ -141,33 +122,31 @@
         let items = [];
         let isGameOver = false;
         
-        const player = {
-            x: GAME_WIDTH / 2 - 40, y: GAME_HEIGHT - 150, 
-            width: 80, height: 60,
-            dx: 0, dy: 0, speed: 9, jumpPower: -17, gravity: 0.65
-        };
+        const player = { x: GAME_WIDTH / 2 - 40, y: GAME_HEIGHT - 150, width: 80, height: 60, dx: 0, dy: 0, speed: 9, jumpPower: -17, gravity: 0.65 };
         const keys = { left: false, right: false };
-
         document.getElementById('bestDisplay').innerText = bestScore;
 
+        // [중요] 게임 시작 함수 (안전장치 추가)
         function startGame() {
             document.getElementById('startScreen').style.display = 'none';
-            // 모바일 오디오 정책 대응 (사용자 클릭 시 재생)
-            const bgm = document.getElementById('bgm'); 
-            bgm.volume = 0.3; bgm.play().catch(()=>{});
+            
+            // 모바일 오디오 재생 실패 방지 (try-catch)
+            try {
+                const bgm = document.getElementById('bgm'); 
+                bgm.volume = 0.3; 
+                bgm.play().catch(e => console.log("Audio play failed (User interaction needed)", e));
+            } catch(e) { console.log(e); }
+            
             resetGame();
         }
 
         function resetGame() {
             document.getElementById('gameOverScreen').style.display = 'none';
-            score = 0;
-            document.getElementById('scoreDisplay').innerText = score;
+            score = 0; document.getElementById('scoreDisplay').innerText = score;
             player.dy = 0; player.y = GAME_HEIGHT - 150; player.x = GAME_WIDTH / 2 - player.width / 2;
             platforms = []; items = []; isGameOver = false;
-            
             platforms.push({ x: GAME_WIDTH/2 - 60, y: GAME_HEIGHT - 80, w: 120, h: 25 });
             generateContent(GAME_HEIGHT - 150);
-            
             if(gameLoop) cancelAnimationFrame(gameLoop);
             gameLoop = requestAnimationFrame(update);
         }
@@ -178,7 +157,6 @@
                 let w = 90 + Math.random() * 50;
                 let x = Math.random() * (GAME_WIDTH - w);
                 platforms.push({ x: x, y: y, w: w, h: 25 });
-
                 if (Math.random() < 0.3) {
                     let type = Math.random() < 0.8 ? 'star' : 'rocket';
                     items.push({ x: x + w/2 - 20, y: y - 50, w: 40, h: 40, type: type });
@@ -190,32 +168,22 @@
             if (isGameOver) return;
             ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
             
-            // 배경 그리기
             let bgIndex = Math.floor(score / 500); 
             if (bgIndex >= bgImages.length) bgIndex = bgImages.length - 1;
             const currentBg = bgImages[bgIndex];
-            
             if(currentBg && currentBg.complete) {
-                // 배경 꽉 채우기 (Cover)
                 const scale = Math.max(GAME_WIDTH / currentBg.width, GAME_HEIGHT / currentBg.height);
                 const x = (GAME_WIDTH - currentBg.width * scale) / 2;
                 const y = (GAME_HEIGHT - currentBg.height * scale) / 2;
                 ctx.drawImage(currentBg, x, y, currentBg.width * scale, currentBg.height * scale);
-            } else {
-                ctx.fillStyle = "#87CEEB"; ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
-            }
+            } else { ctx.fillStyle = "#87CEEB"; ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT); }
 
-            // 플레이어 이동
             if (keys.left) player.x -= player.speed;
             if (keys.right) player.x += player.speed;
-
             if (player.x + player.width < 0) player.x = GAME_WIDTH;
             else if (player.x > GAME_WIDTH) player.x = -player.width;
+            player.dy += player.gravity; player.y += player.dy;
 
-            player.dy += player.gravity;
-            player.y += player.dy;
-
-            // 충돌 처리
             platforms.forEach(p => {
                 if (player.dy > 0 && player.y + player.height > p.y && player.y + player.height < p.y + p.h + 20 && player.x + player.width > p.x + 10 && player.x < p.x + p.w - 10) {
                     player.dy = player.jumpPower;
@@ -224,31 +192,25 @@
                 else { ctx.fillStyle = "#fff"; ctx.fillRect(p.x, p.y, p.w, p.h); }
             });
             
-            // 아이템 처리
             for (let i = items.length - 1; i >= 0; i--) {
                 let it = items[i];
                 let img = it.type === 'star' ? imgStar : imgRocket;
                 if(img.complete) ctx.drawImage(img, it.x, it.y, it.w, it.h);
-                
                 if (player.x < it.x + it.w && player.x + player.width > it.x && player.y < it.y + it.h && player.y + player.height > it.y) {
                     items.splice(i, 1);
-                    if (it.type === 'star') { score += 50; } 
-                    else if (it.type === 'rocket') { player.dy = -40; }
+                    if (it.type === 'star') score += 50; else if (it.type === 'rocket') player.dy = -40;
                     document.getElementById('scoreDisplay').innerText = score;
                 }
             }
 
-            // 스크롤
             if (player.y < GAME_HEIGHT / 2.5) {
-                let diff = GAME_HEIGHT / 2.5 - player.y;
-                player.y = GAME_HEIGHT / 2.5;
+                let diff = GAME_HEIGHT / 2.5 - player.y; player.y = GAME_HEIGHT / 2.5;
                 platforms.forEach((p, index) => {
                     p.y += diff;
                     if (p.y > GAME_HEIGHT) {
                         platforms.splice(index, 1); score += 10;
                         document.getElementById('scoreDisplay').innerText = score;
                         document.getElementById('controlsHint').style.display='none';
-                        
                         let highestY = platforms[platforms.length-1].y;
                         let y = highestY - 110;
                         let w = 90 + Math.random() * 50;
@@ -278,27 +240,32 @@
             document.getElementById('gameOverScreen').style.display = 'flex';
         }
 
-        // 터치 & 키보드 이벤트
         const handleDown = (left) => { if(left) keys.left = true; else keys.right = true; };
         const handleUp = () => { keys.left = false; keys.right = false; };
         
         window.addEventListener('keydown', e => { if(e.code==='ArrowLeft') handleDown(true); if(e.code==='ArrowRight') handleDown(false); });
         window.addEventListener('keyup', handleUp);
         
-        // 모바일 터치 (화면 절반 기준)
+        // [중요] 모바일 터치 이벤트가 버튼 클릭을 방해하지 않도록 처리
         const container = document.getElementById('gameContainer');
         container.addEventListener('touchstart', e => {
-            e.preventDefault(); // 스크롤 방지
-            // 터치 좌표가 화면의 왼쪽인지 오른쪽인지 판별
+            // 시작 화면이나 게임오버 화면이 떠있으면 터치 이벤트 무시 (버튼 클릭 우선)
+            if(document.getElementById('startScreen').style.display !== 'none' || 
+               document.getElementById('gameOverScreen').style.display !== 'none') {
+                return;
+            }
+            e.preventDefault();
             const touchX = e.touches[0].clientX;
-            const screenW = window.innerWidth;
-            handleDown(touchX < screenW / 2);
+            handleDown(touchX < window.innerWidth / 2);
         }, {passive: false});
         
         container.addEventListener('touchend', e => {
+            if(document.getElementById('startScreen').style.display !== 'none' || 
+               document.getElementById('gameOverScreen').style.display !== 'none') {
+                return;
+            }
             e.preventDefault(); handleUp();
         }, {passive: false});
-
     </script>
 </body>
 </html>
