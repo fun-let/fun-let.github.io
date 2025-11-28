@@ -10,7 +10,7 @@ const AD_SETTINGS = {
     },
     // 게임 내부 하단 배너
     gameBottom: {
-        image: "https://via.placeholder.com/320x100/ff4757/ffffff?text=Tralala+Dance",
+        image: "https://github.com/fun-let/funlet/blob/main/images/%ED%94%BC%EB%A7%9D%EC%84%AF%EB%8B%A4.PNG",
         link: "https://www.youtube.com"
     },
     // 사이드바 세로 배너
