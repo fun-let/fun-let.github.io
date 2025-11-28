@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FUNLET - 시뮬레이션</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --primary: #00ff9d; --bg-body: #0f0f1a; --bg-card: #1e1e2f; --text-main: #ffffff; }
+        body { margin:0; background-color:var(--bg-body); color:var(--text-main); font-family:'Noto Sans KR'; }
+        .app-container { display:flex; min-height:100vh; }
+        .sidebar { width:250px; background:#151525; padding:20px; border-right:1px solid #2a2a40; display:flex; flex-direction:column; position:fixed; height:100vh; }
+        .logo { font-size:1.8rem; color:var(--primary); text-decoration:none; font-family:'Black Han Sans'; margin-bottom:40px; display:block;}
+        .menu-item { display:flex; align-items:center; padding:12px 15px; color:#8f8fba; text-decoration:none; margin-bottom:5px; border-radius:10px; }
+        .menu-item:hover, .menu-item.active { background:rgba(0,255,157,0.1); color:var(--primary); }
+        .menu-item i { width:25px; }
+        .main-content { flex:1; margin-left:290px; padding:30px 40px; }
+        .game-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); gap:30px; }
+        .game-card { background:var(--bg-card); border-radius:20px; overflow:hidden; text-decoration:none; color:white; border:1px solid rgba(255,255,255,0.05); display:block; transition:0.3s; }
+        .game-card:hover { transform:translateY(-7px); border-color:var(--primary); box-shadow:0 10px 25px rgba(0,255,157,0.2); }
+        .thumb-wrapper { padding-top:100%; position:relative; }
+        .thumb-wrapper img { position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; }
+        .game-info { padding:20px; }
+        @media (max-width: 768px) { .sidebar { display:none; } .main-content { margin-left:0; padding:20px; } }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <nav class="sidebar">
+            <a href="../index.html" class="logo">FUNLET</a>
+            <div style="color:#666; margin-bottom:10px; font-size:0.8rem;">MENU</div>
+            <a href="../index.html" class="menu-item"><i class="fa-solid fa-house"></i> 홈</a>
+            <div style="color:#666; margin:20px 0 10px 0; font-size:0.8rem;">CATEGORY</div>
+            <a href="./idle.html" class="menu-item"><i class="fa-solid fa-sack-dollar"></i> 키우기/IDLE</a>
+            <a href="./simulation.html" class="menu-item active"><i class="fa-solid fa-paw"></i> 시뮬레이션/뽑기</a>
+            <a href="./action.html" class="menu-item"><i class="fa-solid fa-rocket"></i> 액션/아케이드</a>
+        </nav>
+
+        <main class="main-content">
+            <h2 style="font-family:'Black Han Sans'; font-size:2rem; margin-bottom:30px;">
+                <i class="fa-solid fa-paw" style="color:var(--primary);"></i> 시뮬레이션 & 뽑기
+            </h2>
+            
+            <div class="game-grid">
+                <a href="../games/pet-gacha/index.html" class="game-card">
+                    <div class="thumb-wrapper">
+                        <img src="../images/pet-gacha/pet_gacha_thumb.jpg" alt="Pet Gacha">
+                    </div>
+                    <div class="game-info">
+                        <h3 style="margin:0 0 5px 0;">Pet Gacha King</h3>
+                        <span style="font-size:0.8rem; color:#888;">Simulation / 뽑기</span>
+                    </div>
+                </a>
+            </div>
+        </main>
+    </div>
+    <script src="../js/ads.js"></script>
+</body>
+</html>
