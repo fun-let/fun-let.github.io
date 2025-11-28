@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sky Jump V2 - 진화하는 하늘</title>
+    <title>Sky Jump V3 - 아이템 러쉬</title>
     <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { 
@@ -13,21 +14,15 @@
             display: flex; justify-content: center; align-items: center; height: 100vh;
         }
         
-        /* [핵심] 게임 화면 비율 고정 컨테이너 */
         #gameContainer {
-            position: relative;
-            width: 100%; max-width: 500px; /* PC에서는 너무 커지지 않게 */
-            aspect-ratio: 9 / 16; /* 9:16 비율 고정 (틱톡/릴스 비율) */
-            max-height: 100vh; /* 화면 높이에 맞춤 */
-            background: #222;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            overflow: hidden;
+            position: relative; width: 100%; max-width: 500px;
+            aspect-ratio: 9 / 16; max-height: 100vh;
+            background: #222; box-shadow: 0 0 30px rgba(0,0,0,0.8);
+            overflow: hidden; border-radius: 10px;
         }
 
-        /* 캔버스 */
         #gameCanvas { display: block; width: 100%; height: 100%; }
 
-        /* UI 레이어 */
         .ui-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none;
@@ -35,38 +30,44 @@
         }
 
         .score-board {
-            text-align: center; padding-top: 30px;
-            color: white; font-size: 2.5rem; text-shadow: 2px 2px 0 #000;
+            text-align: center; padding-top: 20px;
+            color: white; text-shadow: 2px 2px 0 #000; z-index: 5;
         }
-        .best-score { font-size: 1rem; color: #ccc; }
+        #scoreDisplay { font-size: 3rem; color: #FFD700; }
+        .best-score { font-size: 1.2rem; color: #fff; background: rgba(0,0,0,0.5); padding: 5px 15px; border-radius: 20px; display: inline-block; margin-top: 5px; }
 
-        /* 화면들 */
         #startScreen, #gameOverScreen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.85);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            pointer-events: auto; z-index: 10;
-            text-align: center; color: white;
+            pointer-events: auto; z-index: 20; text-align: center; color: white;
         }
         
         .btn {
-            background: #00ff9d; color: black; border: none; padding: 15px 40px;
-            font-size: 1.5rem; border-radius: 30px; cursor: pointer;
+            background: #00ff9d; color: black; border: none; padding: 15px 50px;
+            font-size: 1.8rem; border-radius: 50px; cursor: pointer;
             font-family: 'Black Han Sans'; transition: 0.2s;
-            box-shadow: 0 5px 0 #00b870; margin-top: 20px;
+            box-shadow: 0 6px 0 #00b870; margin-top: 30px;
+            animation: pulse 1.5s infinite;
         }
-        .btn:active { transform: translateY(5px); box-shadow: none; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        .btn:active { transform: translateY(5px); box-shadow: none; animation: none; }
         
-        /* 광고 영역 */
-        .ad-area {
-            pointer-events: auto; width: 320px; height: 100px; margin: 0 auto 20px auto;
-        }
-
         .controls-hint {
-            position: absolute; bottom: 140px; width: 100%;
-            display: flex; justify-content: space-between; padding: 0 20px; box-sizing: border-box;
-            color: rgba(255,255,255,0.4); font-size: 1.8rem;
+            position: absolute; bottom: 120px; width: 100%;
+            display: flex; justify-content: space-between; padding: 0 30px; box-sizing: border-box;
+            color: rgba(255,255,255,0.6); font-size: 2rem;
+            animation: blink 2s infinite;
         }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        /* 플로팅 점수 효과 */
+        .float-text {
+            position: absolute; font-size: 2rem; font-weight: bold; color: #FFD700;
+            text-shadow: 2px 2px 0 #000; pointer-events: none;
+            animation: floatUp 0.8s forwards;
+        }
+        @keyframes floatUp { to { transform: translateY(-50px); opacity: 0; } }
     </style>
 </head>
 <body>
@@ -77,43 +78,43 @@
         <div class="ui-layer">
             <div class="score-board">
                 <div id="scoreDisplay">0</div>
-                <div class="best-score">BEST: <span id="bestDisplay">0</span></div>
+                <div class="best-score">최고 기록: <span id="bestDisplay">0</span></div>
             </div>
             
-            <div class="ad-area" id="ad-game-bottom"></div>
-            
             <div class="controls-hint" id="controlsHint">
-                <span><i class="fa-solid fa-arrow-left"></i> 터치</span>
-                <span>터치 <i class="fa-solid fa-arrow-right"></i></span>
+                <span>👈 터치</span>
+                <span>터치 👉</span>
             </div>
         </div>
 
         <div id="startScreen">
-            <h1 style="font-size:3rem; margin-bottom:10px; color:#00ff9d;">SKY JUMP V2</h1>
-            <p>좌우로 움직여서 떨어지지 말고 위로!</p>
-            <p style="font-size:0.9rem; color:#aaa; margin-top:5px;">점수가 오르면 배경이 진화합니다</p>
+            <img src="../../images/sky-jump/player.png" style="width:100px; margin-bottom:20px; animation: bounce 1s infinite;">
+            <h1 style="font-size:3rem; margin:0; color:#00ff9d;">SKY JUMP</h1>
+            <h2 style="font-size:1.5rem; color:#fff; font-weight:normal;">아이템을 먹고 날아오르세요!</h2>
+            <div style="margin-top:20px; display:flex; gap:15px; justify-content:center;">
+                <div style="text-align:center;"><img src="../../images/sky-jump/star.png" width="30"><br><span style="font-size:0.8rem;">+50점</span></div>
+                <div style="text-align:center;"><img src="../../images/sky-jump/rocket.png" width="30"><br><span style="font-size:0.8rem;">부스터</span></div>
+            </div>
             <button class="btn" onclick="startGame()">게임 시작</button>
         </div>
 
         <div id="gameOverScreen" style="display:none;">
-            <h1 style="color:#ff4757; font-size:3rem;">GAME OVER</h1>
-            <p style="font-size:1.5rem;">내 점수: <span id="finalScore">0</span></p>
+            <h1 style="color:#ff4757; font-size:3.5rem; margin:0;">GAME OVER</h1>
+            <p style="font-size:1.5rem; margin-top:10px;">최종 점수: <span id="finalScore" style="color:#FFD700">0</span></p>
             <button class="btn" onclick="resetGame()">다시 도전</button>
-            <a href="../../index.html" style="color:#aaa; margin-top:20px; text-decoration:none; display:block;">홈으로 나가기</a>
+            <a href="../../index.html" style="color:#aaa; margin-top:30px; text-decoration:none; border-bottom:1px solid #aaa;">홈으로 나가기</a>
         </div>
     </div>
 
     <audio id="bgm" src="../../audio/bgm_fast.mp3" loop></audio>
     <audio id="sfx-jump" src="../../audio/jump.mp3"></audio>
-    <audio id="sfx-over" src="../../audio/gameover.mp3"></audio>
+    <audio id="sfx-item" src="../../audio/coin.mp3"></audio> <audio id="sfx-rocket" src="../../audio/open.mp3"></audio> <audio id="sfx-over" src="../../audio/gameover.mp3"></audio>
 
     <script src="../../js/ads.js"></script>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-
-        // 게임 내부 해상도 고정 (이 비율 안에서 그림을 그립니다)
         const GAME_WIDTH = 500;
         const GAME_HEIGHT = 900;
         canvas.width = GAME_WIDTH;
@@ -122,29 +123,32 @@
         // 이미지 로드
         const imgPlayer = new Image(); imgPlayer.src = "../../images/sky-jump/player.png";
         const imgPlatform = new Image(); imgPlatform.src = "../../images/sky-jump/platform.png";
+        const imgStar = new Image(); imgStar.src = "../../images/sky-jump/star.png";
+        const imgRocket = new Image(); imgRocket.src = "../../images/sky-jump/rocket.png";
         
-        // [신규 기능] 배경 이미지 3장 로드
         const bgImages = [];
-        const bgSources = ["bg_stage1.png", "bg_stage2.png", "bg_stage3.png"];
-        bgSources.forEach(src => {
-            const img = new Image();
-            img.src = `../../images/sky-jump/${src}`;
-            bgImages.push(img);
+        ["bg_stage1.png", "bg_stage2.png", "bg_stage3.png"].forEach(src => {
+            const img = new Image(); img.src = `../../images/sky-jump/${src}`; bgImages.push(img);
         });
         
+        // 게임 변수
         let gameLoop;
         let score = 0;
-        let bestScore = localStorage.getItem('skyJumpBestV2') || 0;
+        let bestScore = localStorage.getItem('skyJumpBestV3') || 0;
         let platforms = [];
+        let items = []; // 아이템 배열
         let isGameOver = false;
         
+        // [중요] 캐릭터 설정 - 통통하게 만들기
         const player = {
-            x: GAME_WIDTH / 2 - 25, y: GAME_HEIGHT - 150, width: 60, height: 60, // 캐릭터 크기 (살짝 키움)
-            dx: 0, dy: 0, speed: 7, jumpPower: -15, gravity: 0.6
+            x: GAME_WIDTH / 2 - 40, 
+            y: GAME_HEIGHT - 150, 
+            width: 80,   // 너비는 넓게
+            height: 60,  // 높이는 낮게 -> 통통한 비율!
+            dx: 0, dy: 0, speed: 8, jumpPower: -16, gravity: 0.6
         };
 
         const keys = { left: false, right: false };
-
         document.getElementById('bestDisplay').innerText = bestScore;
 
         function startGame() {
@@ -161,19 +165,31 @@
             player.y = GAME_HEIGHT - 150;
             player.x = GAME_WIDTH / 2 - player.width / 2;
             platforms = [];
+            items = [];
             isGameOver = false;
-            platforms.push({ x: GAME_WIDTH/2 - 50, y: GAME_HEIGHT - 60, w: 100, h: 25 }); // 시작 발판
-            generatePlatforms(GAME_HEIGHT - 150);
+            
+            // 시작 발판
+            platforms.push({ x: GAME_WIDTH/2 - 60, y: GAME_HEIGHT - 80, w: 120, h: 25 });
+            generateContent(GAME_HEIGHT - 150);
+            
             if(gameLoop) cancelAnimationFrame(gameLoop);
             gameLoop = requestAnimationFrame(update);
         }
 
-        function generatePlatforms(startY) {
+        // 발판 & 아이템 생성기
+        function generateContent(startY) {
             for (let i = 0; i < 15; i++) {
-                let y = startY - 80 - i * 90;
-                let w = 80 + Math.random() * 40;
+                let y = startY - 90 - i * 100; // 간격 넓힘
+                let w = 90 + Math.random() * 40;
                 let x = Math.random() * (GAME_WIDTH - w);
+                
                 platforms.push({ x: x, y: y, w: w, h: 25 });
+
+                // 30% 확률로 아이템 생성
+                if (Math.random() < 0.3) {
+                    let type = Math.random() < 0.8 ? 'star' : 'rocket'; // 별 80%, 로켓 20%
+                    items.push({ x: x + w/2 - 15, y: y - 40, w: 30, h: 30, type: type });
+                }
             }
         }
 
@@ -181,123 +197,159 @@
             if (isGameOver) return;
             ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
             
-            // [배경 진화 로직] 50점마다 배경 변경
-            let bgIndex = Math.floor(score / 50); 
-            if (bgIndex >= bgImages.length) bgIndex = bgImages.length - 1; // 마지막 배경 유지
+            // 배경 그리기
+            let bgIndex = Math.floor(score / 500); // 500점마다 배경 변경 (점수 인플레 고려)
+            if (bgIndex >= bgImages.length) bgIndex = bgImages.length - 1;
             const currentBg = bgImages[bgIndex];
             
             if(currentBg && currentBg.complete) {
-                // 비율 유지하며 배경 꽉 채우기 (Cover 방식)
                 const scale = Math.max(GAME_WIDTH / currentBg.width, GAME_HEIGHT / currentBg.height);
-                const x = (GAME_WIDTH / 2) - (currentBg.width / 2) * scale;
-                const y = (GAME_HEIGHT / 2) - (currentBg.height / 2) * scale;
+                const x = (GAME_WIDTH - currentBg.width * scale) / 2;
+                const y = (GAME_HEIGHT - currentBg.height * scale) / 2;
                 ctx.drawImage(currentBg, x, y, currentBg.width * scale, currentBg.height * scale);
             } else {
-                // 이미지 로딩 전엔 그라데이션
-                const grad = ctx.createLinearGradient(0, 0, 0, GAME_HEIGHT);
-                grad.addColorStop(0, "#2980b9"); grad.addColorStop(1, "#6dd5fa");
-                ctx.fillStyle = grad; ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+                ctx.fillStyle = "#87CEEB"; ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
             }
 
-            // 플레이어 이동
+            // 플레이어 좌우 이동
             if (keys.left) player.x -= player.speed;
             if (keys.right) player.x += player.speed;
 
+            // 화면 밖 이동 처리 (통과)
             if (player.x + player.width < 0) player.x = GAME_WIDTH;
             else if (player.x > GAME_WIDTH) player.x = -player.width;
 
+            // 중력
             player.dy += player.gravity;
             player.y += player.dy;
 
-            // 충돌 처리
+            // [로직] 발판 충돌
             platforms.forEach(p => {
                 if (
-                    player.dy > 0 &&
+                    player.dy > 0 && // 떨어질 때만
                     player.y + player.height > p.y &&
-                    player.y + player.height < p.y + p.h + 15 &&
+                    player.y + player.height < p.y + p.h + 20 &&
                     player.x + player.width > p.x + 10 &&
                     player.x < p.x + p.w - 10
                 ) {
                     player.dy = player.jumpPower;
                     playSound('jump');
                 }
-                
                 if(imgPlatform.complete) ctx.drawImage(imgPlatform, p.x, p.y, p.w, p.h);
-                else { ctx.fillStyle = "#00ff9d"; ctx.fillRect(p.x, p.y, p.w, p.h); }
+                else { ctx.fillStyle = "#fff"; ctx.fillRect(p.x, p.y, p.w, p.h); }
             });
 
-            // 스크롤 (화면 올리기)
+            // [로직] 아이템 충돌
+            for (let i = items.length - 1; i >= 0; i--) {
+                let it = items[i];
+                // 아이템 그리기
+                let img = it.type === 'star' ? imgStar : imgRocket;
+                if(img.complete) ctx.drawImage(img, it.x, it.y, it.w, it.h);
+
+                // 충돌 체크
+                if (
+                    player.x < it.x + it.w &&
+                    player.x + player.width > it.x &&
+                    player.y < it.y + it.h &&
+                    player.y + player.height > it.y
+                ) {
+                    // 아이템 획득!
+                    items.splice(i, 1);
+                    if (it.type === 'star') {
+                        score += 50;
+                        showFloatText("+50", it.x, it.y);
+                        playSound('item');
+                    } else if (it.type === 'rocket') {
+                        player.dy = -35; // 슈퍼 점프!
+                        showFloatText("BOOST!!", it.x, it.y);
+                        playSound('rocket');
+                    }
+                    document.getElementById('scoreDisplay').innerText = score;
+                }
+            }
+
+            // [로직] 화면 스크롤
             if (player.y < GAME_HEIGHT / 2.5) {
                 let diff = GAME_HEIGHT / 2.5 - player.y;
                 player.y = GAME_HEIGHT / 2.5;
                 
+                // 발판 이동
                 platforms.forEach((p, index) => {
                     p.y += diff;
                     if (p.y > GAME_HEIGHT) {
                         platforms.splice(index, 1);
-                        score++;
+                        score += 10; // 올라가기만 해도 점수
                         document.getElementById('scoreDisplay').innerText = score;
-                        document.getElementById('controlsHint').style.display = 'none';
-
-                        // 새 발판 생성
+                        
+                        // 새 발판 추가
                         let highestY = platforms[platforms.length-1].y;
-                        let y = highestY - 90;
-                        let w = 80 + Math.random() * 40;
+                        let y = highestY - 100;
+                        let w = 90 + Math.random() * 40;
                         let x = Math.random() * (GAME_WIDTH - w);
                         platforms.push({ x: x, y: y, w: w, h: 25 });
+                        
+                        // 새 아이템 추가
+                        if (Math.random() < 0.3) {
+                             let type = Math.random() < 0.8 ? 'star' : 'rocket';
+                             items.push({ x: x + w/2 - 15, y: y - 40, w: 30, h: 30, type: type });
+                        }
                     }
+                });
+                
+                // 아이템 이동
+                items.forEach((it, index) => {
+                    it.y += diff;
+                    if(it.y > GAME_HEIGHT) items.splice(index, 1);
                 });
             }
 
-            // 플레이어 그리기 (비율 유지됨!)
+            // 플레이어 그리기 (통통한 비율 적용됨)
             if(imgPlayer.complete) ctx.drawImage(imgPlayer, player.x, player.y, player.width, player.height);
-            else { ctx.fillStyle = "white"; ctx.fillRect(player.x, player.y, player.width, player.height); }
+            else { ctx.fillStyle = "lime"; ctx.fillRect(player.x, player.y, player.width, player.height); }
 
             // 게임 오버
-            if (player.y > GAME_HEIGHT) {
-                gameOver();
-                return;
-            }
+            if (player.y > GAME_HEIGHT) gameOver();
+            else gameLoop = requestAnimationFrame(update);
+        }
 
-            gameLoop = requestAnimationFrame(update);
+        function showFloatText(text, x, y) {
+            const el = document.createElement('div');
+            el.className = 'float-text';
+            el.innerText = text;
+            el.style.left = (x + document.getElementById('gameContainer').getBoundingClientRect().left) + 'px'; // 좌표 보정
+            el.style.top = y + 'px';
+            document.getElementById('gameContainer').appendChild(el);
+            setTimeout(() => el.remove(), 800);
         }
 
         function gameOver() {
             isGameOver = true;
             cancelAnimationFrame(gameLoop);
             playSound('over');
-            document.getElementById('bgm').pause(); document.getElementById('bgm').currentTime = 0;
-
+            document.getElementById('bgm').pause();
+            
             if(score > bestScore) {
                 bestScore = score;
-                localStorage.setItem('skyJumpBestV2', bestScore);
+                localStorage.setItem('skyJumpBestV3', bestScore);
                 document.getElementById('bestDisplay').innerText = bestScore;
             }
             document.getElementById('finalScore').innerText = score;
             document.getElementById('gameOverScreen').style.display = 'flex';
         }
 
-        function playSound(type) {
-            const s = document.getElementById(type === 'jump' ? 'sfx-jump' : 'sfx-over');
-            s.currentTime = 0; s.play().catch(()=>{});
+        function playSound(id) {
+            const s = document.getElementById(id === 'item' ? 'sfx-item' : id === 'rocket' ? 'sfx-rocket' : id === 'jump' ? 'sfx-jump' : 'sfx-over');
+            if(s) { s.currentTime = 0; s.play().catch(()=>{}); }
         }
 
-        // 조작
-        window.addEventListener('keydown', e => {
-            if(e.code === 'ArrowLeft') keys.left = true;
-            if(e.code === 'ArrowRight') keys.right = true;
-        });
-        window.addEventListener('keyup', e => {
-            if(e.code === 'ArrowLeft') keys.left = false;
-            if(e.code === 'ArrowRight') keys.right = false;
-        });
-        window.addEventListener('touchstart', e => {
-            e.preventDefault();
-            if(e.touches[0].clientX < window.innerWidth / 2) keys.left = true; else keys.right = true;
-        }, {passive: false});
-        window.addEventListener('touchend', e => {
-             e.preventDefault(); keys.left = false; keys.right = false;
-        }, {passive: false});
+        // 조작 (PC + 모바일)
+        const handleDown = (left) => { if(left) keys.left = true; else keys.right = true; document.getElementById('controlsHint').style.display='none'; };
+        const handleUp = () => { keys.left = false; keys.right = false; };
+
+        window.addEventListener('keydown', e => { if(e.code==='ArrowLeft') handleDown(true); if(e.code==='ArrowRight') handleDown(false); });
+        window.addEventListener('keyup', handleUp);
+        window.addEventListener('touchstart', e => { e.preventDefault(); handleDown(e.touches[0].clientX < window.innerWidth/2); }, {passive:false});
+        window.addEventListener('touchend', e => { e.preventDefault(); handleUp(); }, {passive:false});
 
     </script>
 </body>
