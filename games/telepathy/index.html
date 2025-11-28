@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>우정 텔레파시 테스트</title>
+    <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root { --primary: #FF6B6B; --secondary: #4ECDC4; --bg: #FFE66D; }
+        body { margin: 0; padding: 0; background-color: var(--bg); font-family: 'Jua', sans-serif; overflow-x: hidden; }
+        
+        .container {
+            max-width: 500px; margin: 0 auto; min-height: 100vh;
+            background: white; position: relative; display: flex; flex-direction: column;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        /* 공통 헤더 */
+        .header { padding: 20px; text-align: center; background: var(--primary); color: white; border-bottom: 4px solid rgba(0,0,0,0.1); }
+        .header h1 { margin: 0; font-size: 1.8rem; }
+
+        /* 화면들 */
+        .screen { flex: 1; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; }
+        .screen.active { display: flex; animation: fadeIn 0.5s; }
+
+        /* 시작 화면 */
+        .cover-img { width: 80%; max-width: 300px; margin-bottom: 30px; border-radius: 20px; animation: bounce 2s infinite; }
+        
+        /* 퀴즈 화면 */
+        .progress-bar { width: 100%; height: 10px; background: #eee; border-radius: 5px; margin-bottom: 20px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--secondary); width: 0%; transition: 0.3s; }
+        .question-box { font-size: 1.5rem; margin-bottom: 30px; word-break: keep-all; line-height: 1.4; }
+        
+        .option-btn {
+            width: 100%; padding: 20px; margin-bottom: 15px; border: 3px solid #eee;
+            border-radius: 15px; background: white; font-size: 1.2rem; cursor: pointer;
+            transition: 0.2s; font-family: 'Jua'; color: #555;
+        }
+        .option-btn:active { transform: scale(0.95); background: #f9f9f9; }
+        .option-btn.selected { border-color: var(--primary); background: #fff0f0; color: var(--primary); }
+
+        /* 결과 화면 */
+        .score-circle {
+            width: 150px; height: 150px; border-radius: 50%; background: var(--primary);
+            color: white; display: flex; align-items: center; justify-content: center;
+            font-size: 3rem; margin-bottom: 20px; border: 5px solid white;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        .result-msg { font-size: 1.5rem; margin-bottom: 30px; color: #333; }
+        
+        /* 버튼 스타일 */
+        .action-btn {
+            background: var(--primary); color: white; border: none; padding: 15px 40px;
+            font-size: 1.3rem; border-radius: 50px; cursor: pointer; font-family: 'Jua';
+            box-shadow: 0 5px 0 #d63d3d; transition: 0.1s; width: 80%; margin-bottom: 15px;
+        }
+        .action-btn:active { transform: translateY(5px); box-shadow: none; }
+        .kakao-btn { background: #FEE500; color: #3c1e1e; box-shadow: 0 5px 0 #dbc600; }
+
+        .ad-area { width: 320px; height: 100px; background: #f0f0f0; margin-top: auto; display: flex; align-items: center; justify-content: center; color: #aaa; margin-bottom: 20px;}
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>🔮 우정 텔레파시</h1>
+        </div>
+
+        <div id="screen-start" class="screen active">
+            <img src="../../images/telepathy/cover.png" class="cover-img" onerror="this.src='https://via.placeholder.com/300x300?text=Telepathy'">
+            <h2 id="start-title">나랑 얼마나 잘 맞을까?</h2>
+            <p id="start-desc" style="color:#666; margin-bottom:30px;">10가지 질문으로 알아보는<br>우리의 소름돋는 궁합!</p>
+            
+            <button class="action-btn" id="btn-start" onclick="startQuiz()">테스트 시작하기</button>
+        </div>
+
+        <div id="screen-quiz" class="screen">
+            <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+            <div class="question-box" id="question-text">질문이 여기에 나옵니다</div>
+            
+            <button class="option-btn" onclick="selectOption(0)" id="opt-0">옵션 A</button>
+            <button class="option-btn" onclick="selectOption(1)" id="opt-1">옵션 B</button>
+        </div>
+
+        <div id="screen-share" class="screen">
+            <i class="fa-solid fa-check-circle" style="font-size:5rem; color:#4ECDC4; margin-bottom:20px;"></i>
+            <h2>문제지 생성 완료!</h2>
+            <p>아래 버튼을 눌러 친구에게<br>도전장을 보내세요!</p>
+            
+            <button class="action-btn kakao-btn" onclick="copyLink()">
+                <i class="fa-solid fa-link"></i> 링크 복사하기
+            </button>
+            <button class="action-btn" style="background:#555; box-shadow:0 5px 0 #333;" onclick="location.reload()">
+                다시 만들기
+            </button>
+        </div>
+
+        <div id="screen-result" class="screen">
+            <h3 style="color:#666;">우리의 일치율은?</h3>
+            <div class="score-circle">
+                <span id="score-text">0%</span>
+            </div>
+            <div class="result-msg" id="result-msg">결과 메시지</div>
+            <img id="result-img" src="" style="width:200px; margin-bottom:20px; border-radius:15px;">
+            
+            <button class="action-btn" onclick="location.href='index.html'">나도 문제 만들기</button>
+        </div>
+
+        <div class="ad-area" id="ad-game-bottom"></div>
+    </div>
+
+    <audio id="bgm" src="../../audio/quiz_bgm.mp3" loop></audio>
+    <audio id="sfx-correct" src="../../audio/correct.mp3"></audio>
+    <audio id="sfx-wrong" src="../../audio/wrong.mp3"></audio>
+    <audio id="sfx-win" src="../../audio/win.mp3"></audio>
+    <script src="../../js/ads.js"></script>
+
+    <script>
+        // [질문 리스트] - 사장님 취향대로 수정 가능합니다!
+        const QUESTIONS = [
+            { q: "탕수육 먹을 때 나는?", a: ["찍먹 (소스 찍어서)", "부먹 (소스 부어서)"] },
+            { q: "더 좋아하는 계절은?", a: ["여름 (바다, 수박)", "겨울 (눈, 붕어빵)"] },
+            { q: "연락할 때 더 선호하는 것은?", a: ["카톡/메시지", "전화/보이스톡"] },
+            { q: "쉬는 날 데이트는?", a: ["집콕 넷플릭스", "밖으로 나가자!"] },
+            { q: "노래방에서 나는?", a: ["발라드 감성", "댄스곡 광란"] },
+            { q: "라면 먹을 때?", a: ["꼬들면이 좋아", "푹 익은게 좋아"] },
+            { q: "영화 볼 때?", a: ["로맨스/코미디", "액션/스릴러"] },
+            { q: "약속 시간에 친구가 늦는다면?", a: ["10분까진 괜찮아", "1분도 용서 못해"] },
+            { q: "붕어빵 먹는 순서?", a: ["머리부터", "꼬리부터"] },
+            { q: "다시 태어난다면?", a: ["재벌 2세", "천재 아이돌"] }
+        ];
+
+        let currentStep = 0;
+        let myAnswers = [];     // 내가 고른 답
+        let friendAnswers = []; // 친구가 고른 답 (URL에서 가져옴)
+        let isCreatorMode = true; // 만들기 모드인지, 풀기 모드인지
+
+        // URL 확인 (데이터가 있으면 풀기 모드)
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const data = urlParams.get('data');
+
+            if (data) {
+                // 풀기 모드 (Solver)
+                isCreatorMode = false;
+                try {
+                    friendAnswers = JSON.parse(atob(data)); // 암호 해독
+                    document.getElementById('start-title').innerText = "친구가 보낸 도전장!";
+                    document.getElementById('start-desc').innerText = "과연 친구의 취향을\n몇 개나 맞출 수 있을까?";
+                    document.getElementById('btn-start').innerText = "도전 시작하기";
+                } catch (e) {
+                    alert("잘못된 링크입니다.");
+                    location.href = "index.html";
+                }
+            }
+        };
+
+        function startQuiz() {
+            try { document.getElementById('bgm').play(); } catch(e){}
+            showScreen('screen-quiz');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            document.getElementById('progress').style.width = ((currentStep / QUESTIONS.length) * 100) + "%";
+            document.getElementById('question-text').innerText = QUESTIONS[currentStep].q;
+            document.getElementById('opt-0').innerText = QUESTIONS[currentStep].a[0];
+            document.getElementById('opt-1').innerText = QUESTIONS[currentStep].a[1];
+        }
+
+        function selectOption(idx) {
+            myAnswers.push(idx);
+
+            // 풀기 모드라면 정답 확인
+            if (!isCreatorMode) {
+                if (idx === friendAnswers[currentStep]) {
+                    // 정답
+                    document.getElementById('sfx-correct').play();
+                } else {
+                    // 오답
+                    document.getElementById('sfx-wrong').play();
+                }
+            } else {
+                document.getElementById('sfx-correct').play(); // 만들기 모드는 그냥 소리 재생
+            }
+
+            currentStep++;
+
+            if (currentStep < QUESTIONS.length) {
+                setTimeout(loadQuestion, 200);
+            } else {
+                finishQuiz();
+            }
+        }
+
+        function finishQuiz() {
+            if (isCreatorMode) {
+                // [만들기 모드] -> 링크 생성 화면
+                showScreen('screen-share');
+            } else {
+                // [풀기 모드] -> 결과 채점 화면
+                calculateResult();
+            }
+        }
+
+        // [핵심] 링크 복사 기능
+        function copyLink() {
+            // 답안을 암호화(Base64)해서 URL 뒤에 붙임
+            const data = btoa(JSON.stringify(myAnswers));
+            const url = window.location.origin + window.location.pathname + "?data=" + data;
+            
+            navigator.clipboard.writeText(url).then(() => {
+                alert("링크가 복사되었습니다!\n친구에게 카톡으로 보내보세요.");
+            });
+        }
+
+        // 결과 계산
+        function calculateResult() {
+            let score = 0;
+            for(let i=0; i<QUESTIONS.length; i++) {
+                if(myAnswers[i] === friendAnswers[i]) score++;
+            }
+            
+            const percent = score * 10;
+            showScreen('screen-result');
+            
+            // 점수 애니메이션
+            let now = 0;
+            const timer = setInterval(() => {
+                document.getElementById('score-text').innerText = now + "%";
+                if(now >= percent) clearInterval(timer);
+                now++;
+            }, 20);
+
+            document.getElementById('sfx-win').play();
+
+            // 결과 멘트 & 이미지 설정
+            const img = document.getElementById('result-img');
+            const msg = document.getElementById('result-msg');
+            
+            if (percent === 100) {
+                msg.innerText = "소름! 우린 영혼의 단짝! 💖";
+                img.src = "../../images/telepathy/result_good.png";
+            } else if (percent >= 70) {
+                msg.innerText = "오~ 꽤 잘 통하는데요? 😍";
+                img.src = "../../images/telepathy/result_good.png";
+            } else if (percent >= 40) {
+                msg.innerText = "조금 더 친해져야겠어요 🤔";
+                img.src = "../../images/telepathy/result_bad.png";
+            } else {
+                msg.innerText = "우린... 로또 같은 사이 (안 맞음) 😱";
+                img.src = "../../images/telepathy/result_bad.png";
+            }
+            
+            // 이미지 없을 시 기본 처리
+            img.onerror = function() { this.style.display = 'none'; }
+        }
+
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+    </script>
+</body>
+</html>
