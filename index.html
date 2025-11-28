@@ -3,121 +3,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FUNLET - No.1 Free Game Platform</title>
+    <title>FUNLET - Cyber Arcade</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap" rel="stylesheet"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        :root { --primary: #00ff9d; --bg-body: #121212; --bg-sidebar: #1a1a1a; --bg-card: #252525; --text-main: #ffffff; --text-muted: #aaaaaa; }
-        body { margin: 0; padding: 0; background-color: var(--bg-body); color: var(--text-main); font-family: 'Noto Sans KR', sans-serif; overflow-x: hidden; }
-        .app-container { display: flex; min-height: 100vh; }
-        .sidebar { width: 250px; background-color: var(--bg-sidebar); padding: 20px; border-right: 1px solid #333; display: flex; flex-direction: column; position: fixed; height: 100vh; z-index: 100; }
-        .logo { font-size: 1.8rem; font-weight: 700; color: var(--primary); text-decoration: none; margin-bottom: 40px; display: flex; align-items: center; gap: 10px; font-family: 'Black Han Sans', sans-serif; }
-        .menu-label { font-size: 0.8rem; color: #666; margin-bottom: 10px; font-weight: 500; }
-        .menu-item { display: flex; align-items: center; padding: 12px 15px; color: var(--text-muted); text-decoration: none; border-radius: 10px; margin-bottom: 5px; transition: 0.2s; font-weight: 400; }
-        .menu-item:hover, .menu-item.active { background-color: rgba(0, 255, 157, 0.1); color: var(--primary); }
-        .menu-item i { width: 25px; }
-        .sidebar-ad { margin-top: auto; background: #222; height: 200px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #444; border: 1px dashed #444; font-size: 0.8rem; margin-bottom: 40px; }
-        .main-content { flex: 1; margin-left: 290px; padding: 30px 40px; }
-        .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .search-bar { background: var(--bg-card); padding: 10px 20px; border-radius: 30px; display: flex; align-items: center; width: 400px; border: 1px solid #333; }
-        .search-bar input { background: none; border: none; color: white; margin-left: 10px; width: 100%; outline: none; font-family: inherit; }
-        
-        /* --- [새로 추가된 히어로 섹션 스타일] --- */
-        .hero-section {
-            width: 100%;
-            height: 350px; /* 높이 조절 가능 */
-            border-radius: 20px;
-            overflow: hidden;
-            position: relative;
-            margin-bottom: 30px;
-            display: flex;
-            align-items: center;
-            padding: 0 50px;
-            /* ▼▼▼ [중요] 배경 이미지 넣는 곳 ▼▼▼ */
-            /* 여기에 원하는 이미지 주소를 넣으세요. (예: url('./images/main_bg.jpg')) */
-            background-image: url('https://raw.githubusercontent.com/fun-let/funlet/main/images/title.jpg'); 
-            background-size: cover;
-            background-position: center;
+        /* [V5 디자인: 사이버펑크 네온 테마] */
+        :root {
+            --primary: #00ff9d;       /* 형광 초록 */
+            --secondary: #7000ff;     /* 네온 퍼플 (보조색) */
+            --bg-body: #0f0f1a;       /* 더 깊은 남색 배경 */
+            --bg-sidebar: #151525;    /* 사이드바 */
+            --bg-card: #1e1e2f;       /* 카드 배경 */
+            --text-main: #ffffff;
+            --text-muted: #8f8fba;
         }
-        /* 이미지 위에 어두운 막을 씌워 글씨가 잘 보이게 함 */
-        .hero-overlay {
-            position: absolute; top:0; left:0; width:100%; height:100%;
-            background: linear-gradient(90deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.3) 100%);
-        }
-        .hero-content { position: relative; z-index: 10; max-width: 600px; }
-        .hero-title { font-family: 'Black Han Sans', sans-serif; font-size: 3rem; margin-bottom: 10px; line-height: 1.1; }
-        .hero-title span { color: var(--primary); }
-        .hero-desc { font-size: 1.1rem; color: #ccc; margin-bottom: 25px; }
-        .hero-btn {
-            padding: 15px 30px; background: var(--primary); color: black; font-weight: bold;
-            text-decoration: none; border-radius: 30px; display: inline-block; transition: 0.3s;
-        }
-        .hero-btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0, 255, 157, 0.4); }
-        /* ------------------------------------ */
 
-        .top-ad-banner { width: 100%; height: 100px; background: #1e1e1e; border-radius: 15px; display: flex; align-items: center; justify-content: center; margin-bottom: 40px; border: 1px dashed #333; color: #555; overflow: hidden;}
-        h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
-        .game-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; margin-bottom: 50px; }
-        .game-card { background-color: var(--bg-card); border-radius: 15px; overflow: hidden; text-decoration: none; color: white; transition: transform 0.2s, box-shadow 0.2s; position: relative; }
-        .game-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
-        .thumb-wrapper { position: relative; padding-top: 100%; background: #333; }
-        .thumb-wrapper img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
-        .game-info { padding: 15px; }
-        .game-title { font-size: 1rem; font-weight: 500; margin: 0 0 5px 0; }
-        .game-cat { font-size: 0.8rem; color: var(--text-muted); background: #333; padding: 2px 8px; border-radius: 4px; display: inline-block; }
-        .footer { border-top: 1px solid #333; padding-top: 20px; color: #666; font-size: 0.8rem; margin-top: 50px; }
-        @media (max-width: 768px) { .sidebar { display: none; } .main-content { margin-left: 0; padding: 20px; } .search-bar { width: 100%; } .hero-title { font-size: 2rem; } }
+        body {
+            margin: 0; padding: 0;
+            background-color: var(--bg-body);
+            /* 배경에 은은한 그라데이션 조명 추가 */
+            background-image: radial-gradient(circle at 10% 20%, rgba(112, 0, 255, 0.1) 0%, transparent 40%),
+                              radial-gradient(circle at 90% 80%, rgba(0, 255, 157, 0.1) 0%, transparent 40%);
+            color: var(--text-main);
+            font-family: 'Noto Sans KR', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .app-container { display: flex; min-height: 100vh; }
+
+        /* 사이드바 디자인 강화 */
+        .sidebar {
+            width: 250px; background-color: var(--bg-sidebar); padding: 20px;
+            border-right: 1px solid #2a2a40; display: flex; flex-direction: column;
+            position: fixed; height: 100vh; z-index: 100;
+            box-shadow: 5px 0 15px rgba(0,0,0,0.2);
+        }
+        .logo {
+            font-size: 1.8rem; color: var(--primary); text-decoration: none;
+            margin-bottom: 40px; display: flex; align-items: center; gap: 10px;
+            font-family: 'Black Han Sans', sans-serif;
+            text-shadow: 0 0 10px rgba(0, 255, 157, 0.3); /* 로고 네온 효과 */
+        }
+        .menu-label { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px; font-weight: 500; letter-spacing: 1px; }
+        .menu-item {
+            display: flex; align-items: center; padding: 12px 15px; color: var(--text-muted);
+            text-decoration: none; border-radius: 10px; margin-bottom: 5px; transition: 0.3s;
+            border: 1px solid transparent;
+        }
+        .menu-item:hover, .menu-item.active {
+            background: rgba(0, 255, 157, 0.05);
+            color: var(--primary);
+            border-color: rgba(0, 255, 157, 0.3); /* 호버 시 테두리 빛남 */
+            box-shadow: 0 0 10px rgba(0, 255, 157, 0.1);
+        }
+        .menu-item i { width: 25px; }
+        .sidebar-ad { margin-top: auto; height: 200px; border-radius: 15px; overflow: hidden; margin-bottom: 40px; border: 1px solid #2a2a40; }
+
+        /* 메인 컨텐츠 */
+        .main-content { flex: 1; margin-left: 290px; padding: 30px 40px; }
+        
+        /* 검색창 디자인 강화 */
+        .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .search-bar {
+            background: var(--bg-card); padding: 12px 20px; border-radius: 30px;
+            display: flex; align-items: center; width: 400px;
+            border: 1px solid #2a2a40; transition: 0.3s;
+        }
+        .search-bar:focus-within { /* 검색창 클릭 시 빛남 */
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(0, 255, 157, 0.2);
+        }
+        .search-bar input { background: none; border: none; color: white; margin-left: 10px; width: 100%; outline: none; font-family: inherit; font-size: 1rem; }
+
+        /* 히어로 섹션 (버튼 제거됨) */
+        .hero-section {
+            width: 100%; height: 350px; border-radius: 25px; overflow: hidden;
+            position: relative; margin-bottom: 30px; display: flex; align-items: center; padding: 0 50px;
+            background-image: url('https://images.unsplash.com/photo-1511512578047-dfb367046420?w=1200&q=80');
+            background-size: cover; background-position: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 1px solid rgba(0, 255, 157, 0.1);
+        }
+        .hero-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: linear-gradient(90deg, rgba(15,15,26,0.9) 0%, rgba(15,15,26,0.4) 100%); }
+        .hero-content { position: relative; z-index: 10; max-width: 600px; }
+        .hero-title { font-family: 'Black Han Sans', sans-serif; font-size: 3.2rem; margin-bottom: 15px; line-height: 1.1; text-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        .hero-title span { color: var(--primary); text-shadow: 0 0 20px rgba(0, 255, 157, 0.4); }
+        .hero-desc { font-size: 1.1rem; color: #ccc; margin-bottom: 0; }
+
+        /* 메인 광고 영역 */
+        .top-ad-banner { width: 100%; height: 100px; border-radius: 15px; margin-bottom: 40px; overflow: hidden; border: 1px solid #2a2a40; }
+        
+        h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; text-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        
+        /* 게임 카드 디자인 강화 */
+        .game-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 30px; margin-bottom: 50px; }
+        .game-card {
+            background-color: var(--bg-card); border-radius: 20px; overflow: hidden;
+            text-decoration: none; color: white; transition: all 0.3s ease;
+            position: relative; border: 1px solid rgba(255,255,255,0.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .game-card:hover {
+            transform: translateY(-7px) scale(1.02);
+            border-color: var(--primary);
+            box-shadow: 0 10px 25px rgba(0, 255, 157, 0.3); /* 호버 시 네온 빛 발산 */
+        }
+        .thumb-wrapper { position: relative; padding-top: 100%; background: #151525; }
+        .thumb-wrapper img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transition: 0.3s; }
+        .game-card:hover .thumb-wrapper img { transform: scale(1.05); } /* 호버 시 이미지 약간 확대 */
+        
+        .game-info { padding: 20px; }
+        .game-title { font-size: 1.1rem; font-weight: 700; margin: 0 0 8px 0; }
+        .game-cat {
+            font-size: 0.8rem; color: var(--text-muted); background: rgba(255,255,255,0.05);
+            padding: 4px 10px; border-radius: 20px; display: inline-block; font-weight: 500;
+        }
+
+        .footer { border-top: 1px solid #2a2a40; padding-top: 20px; color: var(--text-muted); font-size: 0.8rem; margin-top: 50px; text-align: center; }
+        
+        @media (max-width: 768px) { .sidebar { display: none; } .main-content { margin-left: 0; padding: 20px; } .search-bar { width: 100%; } .hero-title { font-size: 2.2rem; } }
     </style>
 </head>
 <body>
 
     <div class="app-container">
         <nav class="sidebar">
-            <a href="#" class="logo"><i class="fa-solid fa-gamepad"></i> FUNLET</a>
+            <a href="./index.html" class="logo"><i class="fa-solid fa-gamepad"></i> FUNLET</a>
             <div class="menu-label">MENU</div>
             <a href="./index.html" class="menu-item active"><i class="fa-solid fa-house"></i> 홈</a>
             <a href="#" class="menu-item"><i class="fa-solid fa-fire"></i> 인기 게임</a>
             <div class="menu-label" style="margin-top: 20px;">CATEGORY</div>
             <a href="./category/idle.html" class="menu-item"><i class="fa-solid fa-hand-pointer"></i> 키우기/IDLE</a>
-            <div class="sidebar-ad" id="ad-sidebar">세로 배너 로딩중...</div>
+            <div class="sidebar-ad" id="ad-sidebar"></div>
         </nav>
 
         <main class="main-content">
             <header class="top-header">
                 <div class="search-bar">
-                    <i class="fa-solid fa-magnifying-glass" style="color:#666;"></i>
-                    <input type="text" placeholder="게임 검색...">
+                    <i class="fa-solid fa-magnifying-glass" style="color:var(--text-muted);"></i>
+                    <input type="text" id="searchInput" placeholder="게임 검색... (예: 머니)">
                 </div>
                 <div style="display:flex; gap:15px; align-items:center;">
-                    <i class="fa-solid fa-bell" style="font-size:1.2rem; color:#666;"></i>
-                    <div style="width:35px; height:35px; background:var(--primary); border-radius:50%;"></div>
+                    <i class="fa-solid fa-bell" style="font-size:1.2rem; color:var(--text-muted);"></i>
+                    <div style="width:35px; height:35px; background:var(--primary); border-radius:50%; box-shadow: 0 0 10px var(--primary);"></div>
                 </div>
             </header>
 
             <section class="hero-section">
-                <div class="hero-overlay"></div> <div class="hero-content">
+                <div class="hero-overlay"></div>
+                <div class="hero-content">
                     <h1 class="hero-title">PLAY BEYOND<br><span>IMAGINATION</span></h1>
                     <p class="hero-desc">설치 없이, 로그인 없이. 클릭 한 번으로 시작하는 무한한 재미의 세계!</p>
-                    <a href="#trending" class="hero-btn">지금 시작하기 🚀</a>
                 </div>
             </section>
-            <div class="top-ad-banner" id="ad-main-top">
-                메인 배너 영역 (728x90)
-            </div>
+
+            <div class="top-ad-banner" id="ad-main-top"></div>
 
             <h2 id="trending"><i class="fa-solid fa-thumbs-up" style="color:var(--primary);"></i> 오늘의 추천 게임</h2>
-            <div class="game-grid">
-                <a href="./games/money-clicker/index.html" class="game-card">
+            
+            <div class="game-grid" id="gameGrid">
+                <a href="./games/money-clicker/index.html" class="game-card" data-title="머니 타이쿤 money tycoon">
                     <div class="thumb-wrapper">
-                        <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=500&q=80" alt="Money Clicker">
+                        <img src="https://images.unsplash.com/photo-1614680376593-902f74cf0d41?w=500&q=80" alt="Money Tycoon">
                     </div>
                     <div class="game-info">
                         <h3 class="game-title">Money Tycoon</h3>
                         <span class="game-cat">IDLE / 키우기</span>
                     </div>
                 </a>
-                </div>
+
+                <a href="#" class="game-card" data-title="준비중인 게임 coming soon">
+                    <div class="thumb-wrapper" style="background:#151525; display:flex; align-items:center; justify-content:center;">
+                        <i class="fa-solid fa-gamepad" style="font-size:3rem; color:#333;"></i>
+                    </div>
+                    <div class="game-info">
+                        <h3 class="game-title">Coming Soon</h3>
+                        <span class="game-cat">준비중</span>
+                    </div>
+                </a>
+            </div>
+
+            <div id="noResult" style="display:none; text-align:center; padding:50px; color:var(--text-muted);">
+                <i class="fa-solid fa-circle-exclamation" style="font-size:2rem; margin-bottom:10px;"></i>
+                <p>검색 결과가 없습니다.</p>
+            </div>
 
             <footer class="footer">
                 <p>Copyright © 2025 FUNLET Platform. All rights reserved.</p>
@@ -126,6 +197,30 @@
     </div>
     
     <script src="./js/ads.js"></script>
+    
+    <script>
+        const searchInput = document.getElementById('searchInput');
+        const gameGrid = document.getElementById('gameGrid');
+        const games = gameGrid.getElementsByClassName('game-card');
+        const noResult = document.getElementById('noResult');
+
+        searchInput.addEventListener('keyup', function(e) {
+            const term = e.target.value.toLowerCase();
+            let hasResult = false;
+
+            Array.from(games).forEach(game => {
+                // data-title 속성에 있는 검색 키워드를 확인
+                const title = game.getAttribute('data-title').toLowerCase();
+                if (title.includes(term)) {
+                    game.style.display = 'block';
+                    hasResult = true;
+                } else {
+                    game.style.display = 'none';
+                }
+            });
+
+            noResult.style.display = hasResult ? 'none' : 'block';
+        });
+    </script>
 </body>
 </html>
-
