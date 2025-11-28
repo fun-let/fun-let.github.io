@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pet Gacha King - 전설의 펫을 찾아라</title>
+    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Jua&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root { --primary: #FF9F1C; --bg: #2EC4B6; --panel: #CBF3F0; }
+        body { margin:0; background-color:var(--bg); color:#333; font-family:'Jua', sans-serif; overflow:hidden; user-select:none; }
+        
+        /* 전체 레이아웃 */
+        .game-container { display:flex; height:100vh; background: radial-gradient(circle, #CBF3F0 0%, #2EC4B6 100%); }
+        
+        /* 왼쪽: 알 까기 영역 */
+        .play-area { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; }
+        
+        .title-box { position:absolute; top:20px; text-align:center; }
+        .money-box { 
+            background: white; padding: 10px 25px; border-radius: 30px; 
+            box-shadow: 0 5px 0 #ddd; border: 3px solid #333;
+            font-size: 1.5rem; display:flex; align-items:center; gap:10px;
+        }
+        .money-icon { color: #FFD700; text-shadow: 1px 1px 0 #b8860b; }
+
+        /* 알 (메인 버튼) */
+        .egg-btn {
+            width: 280px; height: 280px; cursor: pointer;
+            transition: transform 0.1s; position: relative; z-index: 5;
+        }
+        .egg-btn img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.2)); }
+        .egg-btn:active { transform: scale(0.95); }
+        
+        /* 알 흔들림 애니메이션 */
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+        .shaking { animation: shake 0.5s; animation-iteration-count: infinite; }
+
+        /* 뽑기 결과 화면 */
+        .result-overlay {
+            position: absolute; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.8); z-index: 100; display:none;
+            flex-direction: column; align-items: center; justify-content: center;
+        }
+        .light-burst {
+            position: absolute; width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
+            animation: rotate 10s linear infinite; z-index: -1;
+        }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        
+        .pet-card {
+            width: 250px; background: white; border-radius: 20px; padding: 20px;
+            text-align: center; box-shadow: 0 0 50px rgba(255,255,255,0.5);
+            animation: zoomIn 0.5s;
+        }
+        .rarity-tag { 
+            display:inline-block; padding: 5px 15px; border-radius: 20px; color:white; font-weight:bold; margin-bottom:15px; 
+            text-shadow: 1px 1px 0 rgba(0,0,0,0.2);
+        }
+        
+        /* 오른쪽: 인벤토리 (도감) */
+        .inventory-area { 
+            width: 350px; background: white; border-left: 3px solid #333; 
+            display: flex; flex-direction: column; 
+        }
+        .inv-header { padding: 20px; text-align: center; background: #FF9F1C; color: white; border-bottom: 3px solid #333; }
+        .inv-list { flex: 1; overflow-y: auto; padding: 15px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; align-content: start; }
+        
+        .inv-item {
+            background: #f0f0f0; border-radius: 10px; padding: 5px; text-align: center;
+            border: 2px solid #ddd; opacity: 0.5; filter: grayscale(100%); transition: 0.3s;
+        }
+        .inv-item.unlocked { opacity: 1; filter: grayscale(0%); border-color: #333; background: #fff; }
+        .inv-item img { width: 100%; height: 60px; object-fit: contain; }
+        .inv-count { font-size: 0.8rem; background: #333; color: white; border-radius: 10px; padding: 2px 5px; margin-top: 5px; }
+
+        /* 등급별 색상 */
+        .grade-C { color: #555; border-color: #999; }
+        .grade-R { color: #3498db; border-color: #3498db; }
+        .grade-E { color: #9b59b6; border-color: #9b59b6; }
+        .grade-L { color: #e67e22; border-color: #e67e22; }
+        .grade-M { color: #e74c3c; border-color: #e74c3c; background: linear-gradient(45deg, #e74c3c, #f1c40f); }
+
+        /* 광고 영역 */
+        .ad-area { position: absolute; bottom: 10px; width: 320px; height: 100px; display: flex; justify-content: center; }
+
+        /* 모바일 대응 */
+        @media (max-width: 768px) {
+            .game-container { flex-direction: column; }
+            .inventory-area { width: 100%; height: 40%; }
+            .egg-btn { width: 200px; height: 200px; }
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="bgm" src="../../audio/gacha_bgm.mp3" loop></audio>
+    <audio id="sfx-shake" src="../../audio/shake.mp3"></audio>
+    <audio id="sfx-open" src="../../audio/open.mp3"></audio>
+
+    <div id="start-screen" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:999; display:flex; flex-direction:column; align-items:center; justify-content:center; color:white;">
+        <h1 style="font-size:3rem; margin-bottom:20px; font-family:'Black Han Sans'; color:#FF9F1C;">PET GACHA KING</h1>
+        <button onclick="startGame()" style="padding:15px 40px; font-size:1.5rem; border-radius:30px; background:#2EC4B6; border:none; color:white; font-family:'Jua'; cursor:pointer; box-shadow:0 5px 0 #1b8a7f;">게임 시작</button>
+    </div>
+
+    <div class="game-container">
+        <div class="play-area">
+            <div class="title-box">
+                <div class="money-box">
+                    <i class="fa-solid fa-coins money-icon"></i>
+                    <span id="moneyDisplay">0</span>
+                </div>
+                <div style="margin-top:10px; background:rgba(0,0,0,0.2); padding:5px 15px; border-radius:20px; color:white; font-size:0.9rem;">
+                    클릭해서 코인을 모으고 펫을 뽑으세요! (1회 100코인)
+                </div>
+            </div>
+
+            <div class="egg-btn" id="eggBtn" onclick="clickEgg()">
+                <img src="../../images/pet-gacha/egg.png" alt="Egg">
+            </div>
+            
+            <div style="margin-top:20px;">
+                <button onclick="tryGacha()" style="padding:10px 30px; font-size:1.2rem; background:#FF4757; color:white; border:none; border-radius:15px; cursor:pointer; box-shadow: 0 4px 0 #c0392b; font-family:'Jua';">
+                    알 부화시키기 (100코인)
+                </button>
+            </div>
+
+            <div class="ad-area" id="ad-game-bottom"></div>
+        </div>
+
+        <div class="inventory-area">
+            <div class="inv-header">
+                <h3>📜 나의 펫 도감</h3>
+            </div>
+            <div class="inv-list" id="invList">
+                </div>
+        </div>
+    </div>
+
+    <div class="result-overlay" id="resultScreen" onclick="closeResult()">
+        <div class="light-burst"></div>
+        <div class="pet-card">
+            <div class="rarity-tag" id="resRarity">LEGENDARY</div>
+            <img id="resImg" src="" style="width:150px; height:150px; object-fit:contain; margin-bottom:15px;">
+            <h2 id="resName" style="margin:0;">드래곤</h2>
+            <p style="color:#888; margin-top:5px;">터치해서 닫기</p>
+        </div>
+    </div>
+
+    <script src="../../js/ads.js"></script>
+    <script>
+        // 게임 데이터
+        let game = {
+            money: 0,
+            pets: [
+                { id: 0, name: "멍멍이", grade: "C", chance: 50, img: "pet_c.png", color: "#95a5a6", count: 0 },
+                { id: 1, name: "야옹이", grade: "C", chance: 30, img: "pet_c.png", color: "#95a5a6", count: 0 }, // 이미지 재사용 (파일이 많지 않을 경우)
+                { id: 2, name: "아기곰", grade: "R", chance: 14, img: "pet_r.png", color: "#3498db", count: 0 },
+                { id: 3, name: "유니콘", grade: "E", chance: 5, img: "pet_e.png", color: "#9b59b6", count: 0 },
+                { id: 4, name: "드래곤", grade: "L", chance: 0.9, img: "pet_l.png", color: "#e67e22", count: 0 },
+                { id: 5, name: "우주신", grade: "M", chance: 0.1, img: "pet_m.png", color: "#e74c3c", count: 0 }
+            ]
+        };
+
+        const eggBtn = document.getElementById('eggBtn');
+        const sfxShake = document.getElementById('sfx-shake');
+        const sfxOpen = document.getElementById('sfx-open');
+
+        function startGame() {
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('bgm').volume = 0.3;
+            document.getElementById('bgm').play();
+            loadGame();
+        }
+
+        function clickEgg() {
+            // 펫 보유량에 따라 클릭당 코인 증가 (성장 요소)
+            let clickPower = 10; 
+            game.pets.forEach(p => clickPower += (p.count * (p.id + 1) * 2));
+            
+            game.money += clickPower;
+            updateUI();
+            
+            // 애니메이션
+            eggBtn.style.transform = "scale(0.95)";
+            setTimeout(() => eggBtn.style.transform = "scale(1)", 100);
+        }
+
+        function tryGacha() {
+            if(game.money < 100) {
+                alert("코인이 부족해요! 알을 클릭해서 코인을 모으세요.");
+                return;
+            }
+
+            game.money -= 100;
+            updateUI();
+
+            // 연출 시작
+            eggBtn.classList.add('shaking');
+            sfxShake.play();
+
+            setTimeout(() => {
+                eggBtn.classList.remove('shaking');
+                performGacha();
+            }, 1000); // 1초 흔들고 결과 나옴
+        }
+
+        function performGacha() {
+            sfxOpen.play();
+            const rand = Math.random() * 100;
+            let currentChance = 0;
+            let selectedPet = null;
+
+            // 확률 계산 로직
+            for(let pet of game.pets) {
+                currentChance += pet.chance;
+                if(rand <= currentChance) {
+                    selectedPet = pet;
+                    break;
+                }
+            }
+
+            if(!selectedPet) selectedPet = game.pets[0]; // 안전장치
+
+            // 펫 획득 처리
+            selectedPet.count++;
+            saveGame();
+            updateUI();
+            showResult(selectedPet);
+        }
+
+        function showResult(pet) {
+            const screen = document.getElementById('resultScreen');
+            const tag = document.getElementById('resRarity');
+            const img = document.getElementById('resImg');
+            const name = document.getElementById('resName');
+
+            tag.innerText = getGradeName(pet.grade);
+            tag.style.background = pet.color;
+            img.src = "../../images/pet-gacha/" + pet.img;
+            name.innerText = pet.name;
+            name.style.color = pet.color;
+
+            screen.style.display = 'flex';
+        }
+
+        function closeResult() {
+            document.getElementById('resultScreen').style.display = 'none';
+        }
+
+        function getGradeName(grade) {
+            if(grade === 'C') return "COMMON";
+            if(grade === 'R') return "RARE";
+            if(grade === 'E') return "EPIC";
+            if(grade === 'L') return "LEGENDARY";
+            if(grade === 'M') return "MYTHIC";
+            return "PET";
+        }
+
+        function updateUI() {
+            document.getElementById('moneyDisplay').innerText = game.money.toLocaleString();
+            
+            const list = document.getElementById('invList');
+            list.innerHTML = "";
+            
+            game.pets.forEach(pet => {
+                const div = document.createElement('div');
+                div.className = `inv-item ${pet.count > 0 ? 'unlocked' : ''} grade-${pet.grade}`;
+                div.innerHTML = `
+                    <img src="../../images/pet-gacha/${pet.img}" onerror="this.src='https://via.placeholder.com/60?text=?'">
+                    <div style="font-size:0.8rem; font-weight:bold;">${pet.name}</div>
+                    <div class="inv-count">x${pet.count}</div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function saveGame() {
+            localStorage.setItem('petGachaV1', JSON.stringify(game));
+        }
+
+        function loadGame() {
+            if(localStorage.getItem('petGachaV1')) {
+                const saved = JSON.parse(localStorage.getItem('petGachaV1'));
+                game.money = saved.money;
+                saved.pets.forEach((p, i) => {
+                    if(game.pets[i]) game.pets[i].count = p.count;
+                });
+            }
+            updateUI();
+        }
+    </script>
+</body>
+</html>
