@@ -1,0 +1,18 @@
+{
+  "hero": {
+    "image": "https://fun-let.github.io/funlet/images/bg_hero.png",
+    "link": "#"
+  },
+  "mainTop": {
+    "image": "https://via.placeholder.com/728x90",
+    "link": "https://google.com"
+  },
+  "sidebar": {
+    "image": "https://via.placeholder.com/160x600",
+    "link": "https://coupang.com"
+  },
+  "gameBottom": {
+    "image": "https://via.placeholder.com/320x100",
+    "link": "https://youtube.com"
+  }
+}
