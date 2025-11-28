@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sky Jump - 무한의 탑</title>
+    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { margin: 0; padding: 0; background: #222; overflow: hidden; font-family: 'Black Han Sans', sans-serif; touch-action: none; }
+        
+        /* 게임 화면 (캔버스) */
+        #gameCanvas {
+            display: block; margin: 0 auto; background: #111;
+            /* 모바일 꽉 찬 화면, PC는 적당한 크기 */
+            max-width: 500px; width: 100%; height: 100vh;
+            border-left: 2px solid #444; border-right: 2px solid #444;
+        }
+
+        /* UI 오버레이 */
+        .ui-layer {
+            position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            width: 100%; max-width: 500px; height: 100%;
+            pointer-events: none; /* 클릭은 캔버스로 통과 */
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+
+        /* 점수판 */
+        .score-board {
+            text-align: center; padding-top: 50px;
+            color: white; font-size: 3rem; 
+            text-shadow: 2px 2px 0 #000;
+        }
+        .best-score { font-size: 1rem; color: #aaa; margin-top: -10px; }
+
+        /* 시작/재시작 화면 */
+        #startScreen, #gameOverScreen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            pointer-events: auto; z-index: 10;
+        }
+        
+        .btn {
+            background: #00ff9d; color: black; border: none; padding: 15px 40px;
+            font-size: 1.5rem; border-radius: 30px; cursor: pointer;
+            font-family: 'Black Han Sans'; transition: 0.2s;
+            box-shadow: 0 5px 0 #00b870; margin-top: 20px;
+        }
+        .btn:active { transform: translateY(5px); box-shadow: none; }
+        
+        /* 하단 광고 영역 */
+        .ad-area {
+            pointer-events: auto; /* 광고는 클릭 가능해야 함 */
+            width: 320px; height: 100px; margin-bottom: 20px;
+            align-self: center;
+        }
+
+        /* 모바일 조작 안내 */
+        .controls-hint {
+            position: absolute; bottom: 150px; width: 100%;
+            display: flex; justify-content: space-between; padding: 0 20px; box-sizing: border-box;
+            color: rgba(255,255,255,0.3); font-size: 2rem;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <div class="ui-layer">
+        <div class="score-board">
+            <div id="scoreDisplay">0</div>
+            <div class="best-score">BEST: <span id="bestDisplay">0</span></div>
+        </div>
+        
+        <div class="ad-area" id="ad-game-bottom"></div>
+        
+        <div class="controls-hint" id="controlsHint">
+            <span><i class="fa-solid fa-arrow-left"></i> 터치</span>
+            <span>터치 <i class="fa-solid fa-arrow-right"></i></span>
+        </div>
+    </div>
+
+    <div id="startScreen">
+        <h1 style="color:white; font-size:3rem; margin-bottom:10px; color:#00ff9d;">SKY JUMP</h1>
+        <p style="color:#ccc;">좌우로 움직여서 떨어지지 말고 올라가세요!</p>
+        <button class="btn" onclick="startGame()">게임 시작</button>
+    </div>
+
+    <div id="gameOverScreen" style="display:none;">
+        <h1 style="color:#ff4757; font-size:3rem;">GAME OVER</h1>
+        <p style="color:white;">점수: <span id="finalScore">0</span></p>
+        <button class="btn" onclick="resetGame()">다시 하기</button>
+        <a href="../../index.html" style="color:#aaa; margin-top:20px; text-decoration:none;">홈으로 나가기</a>
+    </div>
+
+    <audio id="bgm" src="../../audio/bgm_fast.mp3" loop></audio>
+    <audio id="sfx-jump" src="../../audio/jump.mp3"></audio>
+    <audio id="sfx-over" src="../../audio/gameover.mp3"></audio>
+
+    <script src="../../js/ads.js"></script>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // 이미지 로드
+        const imgPlayer = new Image(); imgPlayer.src = "../../images/sky-jump/player.png";
+        const imgPlatform = new Image(); imgPlatform.src = "../../images/sky-jump/platform.png";
+        const imgBg = new Image(); imgBg.src = "../../images/sky-jump/bg.png";
+        
+        // 게임 상태 변수
+        let gameLoop;
+        let score = 0;
+        let bestScore = localStorage.getItem('skyJumpBest') || 0;
+        let platforms = [];
+        let isGameOver = false;
+        
+        // 플레이어 설정
+        const player = {
+            x: 0, y: 0, width: 40, height: 40,
+            dx: 0, dy: 0, speed: 5, jumpPower: -12, gravity: 0.5
+        };
+
+        // 입력 상태
+        const keys = { left: false, right: false };
+
+        // 초기화
+        function initCanvas() {
+            canvas.width = Math.min(window.innerWidth, 500);
+            canvas.height = window.innerHeight;
+            player.x = canvas.width / 2 - player.width / 2;
+            player.y = canvas.height - 150;
+            
+            document.getElementById('bestDisplay').innerText = bestScore;
+        }
+
+        // 게임 시작
+        function startGame() {
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('bgm').volume = 0.3;
+            document.getElementById('bgm').play().catch(()=>{});
+            
+            resetVariables();
+            generatePlatforms();
+            gameLoop = requestAnimationFrame(update);
+        }
+
+        function resetVariables() {
+            score = 0;
+            player.dy = 0;
+            player.y = canvas.height - 150;
+            player.x = canvas.width / 2 - player.width / 2;
+            platforms = [];
+            isGameOver = false;
+            // 시작 발판
+            platforms.push({ x: canvas.width/2 - 40, y: canvas.height - 50, w: 80, h: 20 });
+        }
+
+        function resetGame() {
+            document.getElementById('gameOverScreen').style.display = 'none';
+            resetVariables();
+            generatePlatforms();
+            gameLoop = requestAnimationFrame(update);
+        }
+
+        // 발판 생성 로직
+        function generatePlatforms() {
+            for (let i = 0; i < 10; i++) {
+                let y = canvas.height - 100 - i * 100;
+                let w = 70 + Math.random() * 30;
+                let x = Math.random() * (canvas.width - w);
+                platforms.push({ x: x, y: y, w: w, h: 20 });
+            }
+        }
+
+        // 게임 메인 루프
+        function update() {
+            if (isGameOver) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 배경 그리기 (반복 패턴)
+            if(imgBg.complete) ctx.drawImage(imgBg, 0, 0, canvas.width, canvas.height);
+            else ctx.fillStyle = "#111"; // 이미지가 없으면 검은색
+
+            // 1. 플레이어 이동 (좌우)
+            if (keys.left) player.x -= player.speed;
+            if (keys.right) player.x += player.speed;
+
+            // 벽 통과 (화면 밖으로 나가면 반대편에서 나옴)
+            if (player.x + player.width < 0) player.x = canvas.width;
+            else if (player.x > canvas.width) player.x = -player.width;
+
+            // 2. 중력 적용
+            player.dy += player.gravity;
+            player.y += player.dy;
+
+            // 3. 발판 충돌 체크
+            platforms.forEach(p => {
+                if (
+                    player.dy > 0 && // 떨어질 때만 밟을 수 있음
+                    player.y + player.height > p.y &&
+                    player.y + player.height < p.y + p.h + 10 &&
+                    player.x + player.width > p.x &&
+                    player.x < p.x + p.w
+                ) {
+                    player.dy = player.jumpPower; // 점프!
+                    playSound('jump');
+                }
+                
+                // 발판 그리기
+                if(imgPlatform.complete) ctx.drawImage(imgPlatform, p.x, p.y, p.w, p.h);
+                else {
+                    ctx.fillStyle = "#00ff9d";
+                    ctx.fillRect(p.x, p.y, p.w, p.h);
+                }
+            });
+
+            // 4. 화면 스크롤 (캐릭터가 화면 중간보다 높이 올라가면 발판을 내림)
+            if (player.y < canvas.height / 2) {
+                let diff = canvas.height / 2 - player.y;
+                player.y = canvas.height / 2;
+                
+                platforms.forEach(p => {
+                    p.y += diff;
+                    // 화면 아래로 사라진 발판 제거 후 위에 새로 생성
+                    if (p.y > canvas.height) {
+                        p.y = -20;
+                        p.x = Math.random() * (canvas.width - p.w);
+                        score++;
+                        document.getElementById('scoreDisplay').innerText = score;
+                    }
+                });
+            }
+
+            // 5. 플레이어 그리기
+            if(imgPlayer.complete) ctx.drawImage(imgPlayer, player.x, player.y, player.width, player.height);
+            else {
+                ctx.fillStyle = "white";
+                ctx.fillRect(player.x, player.y, player.width, player.height);
+            }
+
+            // 6. 게임 오버 체크 (화면 아래로 떨어짐)
+            if (player.y > canvas.height) {
+                gameOver();
+                return;
+            }
+
+            gameLoop = requestAnimationFrame(update);
+        }
+
+        function gameOver() {
+            isGameOver = true;
+            cancelAnimationFrame(gameLoop);
+            playSound('over');
+            
+            // 최고 기록 갱신
+            if(score > bestScore) {
+                bestScore = score;
+                localStorage.setItem('skyJumpBest', bestScore);
+                document.getElementById('bestDisplay').innerText = bestScore;
+            }
+            
+            document.getElementById('finalScore').innerText = score;
+            document.getElementById('gameOverScreen').style.display = 'flex';
+        }
+
+        function playSound(type) {
+            if(type === 'jump') {
+                const s = document.getElementById('sfx-jump');
+                s.currentTime = 0; s.play().catch(()=>{});
+            } else if(type === 'over') {
+                document.getElementById('sfx-over').play().catch(()=>{});
+            }
+        }
+
+        // 입력 이벤트 리스너 (PC 키보드)
+        window.addEventListener('keydown', e => {
+            if(e.code === 'ArrowLeft') keys.left = true;
+            if(e.code === 'ArrowRight') keys.right = true;
+        });
+        window.addEventListener('keyup', e => {
+            if(e.code === 'ArrowLeft') keys.left = false;
+            if(e.code === 'ArrowRight') keys.right = false;
+        });
+
+        // 입력 이벤트 리스너 (모바일 터치)
+        window.addEventListener('touchstart', e => {
+            const touchX = e.touches[0].clientX;
+            if(touchX < window.innerWidth / 2) keys.left = true;
+            else keys.right = true;
+            
+            document.getElementById('controlsHint').style.display = 'none'; // 터치 시작하면 힌트 숨김
+        });
+        window.addEventListener('touchend', () => {
+            keys.left = false;
+            keys.right = false;
+        });
+
+        // 화면 크기 변경 대응
+        window.addEventListener('resize', initCanvas);
+        initCanvas();
+
+    </script>
+</body>
+</html>
