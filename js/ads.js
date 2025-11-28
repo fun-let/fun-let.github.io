@@ -1,51 +1,70 @@
-// [Funlet 광고 통합 관리 시스템]
-// 이 파일의 내용만 바꾸면 모든 게임의 배너가 한 번에 바뀝니다.
+// [Funlet 광고 통합 관리 시스템 V2]
+// 이미지가 없을 때 대체 문구를 보여주는 기능이 추가되었습니다.
 
-// 1. 이미지 주소 설정 (나중에 여기만 수정하면 됩니다)
 const AD_SETTINGS = {
-    // 메인 상단 가로 배너 (PC용)
+    // 1. 메인 상단 가로 배너 (728x90)
     mainTop: {
-        image: "https://via.placeholder.com/728x90/00ff9d/000000?text=Grand+Open+Event",
-        link: "https://www.google.com" // 클릭 시 이동할 주소
+        // 여기에 실제 광고 이미지 주소를 넣으세요. 없으면 비워두거나 깨진 주소를 넣어도 대체 문구가 뜹니다.
+        image: "", // 예: "https://fun-let.github.io/funlet/images/main_banner.png"
+        link: "#"
     },
-    // 게임 내부 하단 배너
+
+    // 2. 게임 내부 하단 배너 (320x100)
     gameBottom: {
-        image: "https://raw.githubusercontent.com/fun-let/funlet/main/images/mangsudda.PNG",
-        link: "https://www.youtube.com"
+        image: "https://fun-let.github.io/funlet/images/mangsudda.PNG", // 실제 이미지가 있으면 이게 뜹니다.
+        link: "#"
     },
-    // 사이드바 세로 배너
+
+    // 3. 사이드바 세로 배너 (160x600)
     sidebar: {
-        image: "https://via.placeholder.com/160x600/333333/ffffff?text=Ad+Area",
+        image: "", // 이미지가 없으면 대체 문구가 뜹니다.
         link: "#"
     }
 };
 
-// 2. 광고를 화면에 뿌려주는 기능 (건드리지 마세요)
+// --- 광고 로더 (이미지 에러 처리 기능 추가) ---
 function loadAds() {
-    // 메인 배너 찾기
-    const mainBanner = document.getElementById('ad-main-top');
-    if(mainBanner) {
-        mainBanner.innerHTML = `<a href="${AD_SETTINGS.mainTop.link}" target="_blank">
-            <img src="${AD_SETTINGS.mainTop.image}" style="width:100%; height:100%; object-fit:cover; border-radius:10px;">
-        </a>`;
+    // 대체 문구 (Placeholder) 템플릿
+    const placeholderHTML = `
+        <div style="width:100%; height:100%; background: linear-gradient(45deg, #1a1a2e, #16213e); display:flex; flex-direction:column; align-items:center; justify-content:center; color:#666; font-family:'Noto Sans KR'; text-align:center; border: 1px dashed #333;">
+            <i class="fa-solid fa-bullhorn" style="font-size:1.5rem; color:#00ff9d; margin-bottom:10px;"></i>
+            <div style="font-weight:bold; color:#ddd;">광고주님을 모십니다</div>
+            <div style="font-size:0.8rem;">YOUR AD HERE</div>
+        </div>
+    `;
+
+    function injectAd(elementId, adData, fitStyle) {
+        const container = document.getElementById(elementId);
+        if (!container) return;
+
+        // 이미지가 없거나 주소가 비어있으면 바로 대체 문구 표시
+        if (!adData.image) {
+            container.innerHTML = placeholderHTML;
+            return;
+        }
+
+        // 이미지 로드 시도
+        const img = new Image();
+        img.src = adData.image;
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.objectFit = fitStyle;
+        img.style.borderRadius = 'inherit';
+
+        // 이미지 로드 성공 시
+        img.onload = function() {
+            container.innerHTML = `<a href="${adData.link}" target="_blank" style="display:block; width:100%; height:100%;">${img.outerHTML}</a>`;
+        };
+
+        // 이미지 로드 실패 시 (깨진 이미지) -> 대체 문구 표시
+        img.onerror = function() {
+            container.innerHTML = placeholderHTML;
+        };
     }
 
-    // 게임 하단 배너 찾기
-    const gameBanner = document.getElementById('ad-game-bottom');
-    if(gameBanner) {
-        gameBanner.innerHTML = `<a href="${AD_SETTINGS.gameBottom.link}" target="_blank">
-            <img src="${AD_SETTINGS.gameBottom.image}" style="width:100%; height:100%; object-fit:contain;">
-        </a>`;
-    }
-
-    // 사이드바 배너 찾기
-    const sideBanner = document.getElementById('ad-sidebar');
-    if(sideBanner) {
-        sideBanner.innerHTML = `<a href="${AD_SETTINGS.sidebar.link}" target="_blank">
-            <img src="${AD_SETTINGS.sidebar.image}" style="width:100%; height:100%; object-fit:cover;">
-        </a>`;
-    }
+    injectAd('ad-main-top', AD_SETTINGS.mainTop, 'cover');
+    injectAd('ad-game-bottom', AD_SETTINGS.gameBottom, 'contain');
+    injectAd('ad-sidebar', AD_SETTINGS.sidebar, 'cover');
 }
 
-// 페이지 로딩 완료 시 광고 실행
 window.addEventListener('DOMContentLoaded', loadAds);
