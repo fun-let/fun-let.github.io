@@ -1,7 +1,179 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Funlet - AI 게임 스테이션</title>
+    <style>
+        /* [스타일 설정] 디자인을 담당하는 부분입니다 */
+        :root {
+            --main-color: #00ff88; /* 포인트 색상 (형광 초록) */
+            --bg-color: #121212;   /* 배경색 (다크 모드) */
+            --card-bg: #1e1e1e;    /* 게임 카드 배경색 */
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: white;
+            font-family: 'Pretendard', sans-serif; /* 폰트 */
+        }
+
+        /* 상단 네비게이션 바 */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background-color: rgba(0,0,0,0.8);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--main-color);
+            text-decoration: none;
+        }
+
+        /* 메인 광고 배너 영역 */
+        .hero-banner {
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(45deg, #2c3e50, #000000); /* 임시 배경 */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .ad-space-text {
+            color: #888;
+            border: 1px dashed #555;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        /* 게임 리스트 영역 */
+        .container {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            border-left: 5px solid var(--main-color);
+            padding-left: 10px;
+            margin-bottom: 20px;
+        }
+
+        /* 그리드 레이아웃 (게임 카드 배치) */
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* 모바일에선 작게, PC에선 넓게 */
+            gap: 20px;
+        }
+
+        /* 게임 카드 디자인 */
+        .game-card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+            color: white;
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px); /* 마우스 올리면 살짝 뜸 */
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.2);
+        }
+
+        .game-thumb {
+            width: 100%;
+            height: 150px;
+            background-color: #333; /* 썸네일 없을 때 회색 배경 */
+            object-fit: cover;
+        }
+
+        .game-info {
+            padding: 10px;
+        }
+
+        .game-title {
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .game-desc {
+            font-size: 0.7rem;
+            color: #aaa;
+            margin-top: 5px;
+        }
+
+        /* 하단 푸터 */
+        footer {
+            text-align: center;
+            padding: 40px;
+            color: #555;
+            font-size: 0.8rem;
+            margin-top: 50px;
+            border-top: 1px solid #333;
+        }
+    </style>
+</head>
 <body>
-<h1>나의 AI 게임 플랫폼</h1>
-<p>여기에 게임이 올라갈 예정입니다.</p>
+
+    <nav>
+        <a href="#" class="logo">FUNLET</a>
+        <span style="font-size:0.8rem; color:#aaa;">로그인 (준비중)</span>
+    </nav>
+
+    <div class="hero-banner">
+        <h1>오늘의 추천 게임</h1>
+        <p>AI가 만든 초간단 킬링타임 게임을 즐겨보세요!</p>
+        <div class="ad-space-text">광고 배너 영역 (320x100)</div>
+    </div>
+
+    <div class="container">
+        <h2>🔥 인기 급상승 게임</h2>
+        
+        <div class="game-grid">
+            
+            <a href="./game1/index.html" class="game-card">
+                <img src="https://via.placeholder.com/300x300/00ff88/000000?text=GAME+1" class="game-thumb" alt="게임1">
+                <div class="game-info">
+                    <p class="game-title">벽돌 깨기 네온</p>
+                    <p class="game-desc">끝없이 쏟아지는 벽돌을 파괴하세요!</p>
+                </div>
+            </a>
+
+            <a href="#" class="game-card" onclick="alert('준비 중입니다!')">
+                <img src="https://via.placeholder.com/300x300/ff0055/000000?text=Comming+Soon" class="game-thumb" alt="준비중">
+                <div class="game-info">
+                    <p class="game-title">준비 중인 게임</p>
+                    <p class="game-desc">곧 새로운 게임이 업데이트됩니다.</p>
+                </div>
+            </a>
+
+            </div>
+    </div>
+
+    <div style="text-align:center; margin-top:20px;">
+        <div class="ad-space-text" style="display:inline-block; width:300px;">하단 광고 영역</div>
+    </div>
+
+    <footer>
+        <p>© 2024 FUNLET. All rights reserved.</p>
+        <p>AI Powered Hyper-Casual Game Platform</p>
+    </footer>
+
 </body>
 </html>
