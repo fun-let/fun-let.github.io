@@ -3,23 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FUNLET - Free Online Arcade</title>
+    <title>FUNLET - Next Gen Arcade</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
-        /* [V2 디자인 업데이트] */
         :root {
-            --main-color: #00ff88;
-            --bg-color: #0a0a0a;
-            --card-bg: #161616;
-            --text-gray: #a0a0a0;
+            --main-color: #00ff9d; /* 더 쨍한 민트색 */
+            --bg-color: #0f0f0f;
+            --card-bg: #1a1a1a;
+            --text-main: #ffffff;
+            --text-sub: #888888;
         }
-        
+
         body {
             margin: 0;
             padding: 0;
             background-color: var(--bg-color);
-            color: white;
-            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            color: var(--text-main);
+            /* 기본 폰트 설정 */
+            font-family: 'Noto Sans KR', sans-serif; 
+        }
+
+        /* 제목 전용 폰트 설정 */
+        h1, h2, .logo, .cat-btn {
+            font-family: 'Black Han Sans', sans-serif;
+            font-weight: normal; /* 이 폰트는 원래 두꺼워서 bold 처리 안 함 */
         }
 
         /* 네비게이션 */
@@ -27,9 +40,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px 40px;
-            background: rgba(10, 10, 10, 0.9);
-            backdrop-filter: blur(10px);
+            padding: 20px 5%;
+            background: rgba(15, 15, 15, 0.95);
             border-bottom: 1px solid #333;
             position: sticky;
             top: 0;
@@ -37,182 +49,120 @@
         }
 
         .logo {
-            font-size: 1.8rem;
-            font-weight: 900;
+            font-size: 2rem;
             color: var(--main-color);
             text-decoration: none;
             letter-spacing: -1px;
-            text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+            /* 로고에 네온 효과 */
+            text-shadow: 0 0 15px rgba(0, 255, 157, 0.4);
         }
 
-        .user-menu {
-            font-size: 0.9rem;
-            color: white;
-            background: #333;
-            padding: 8px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-        }
-
-        /* 히어로 섹션 (메인 배너) */
+        /* 히어로 섹션 */
         .hero {
             text-align: center;
-            padding: 80px 20px;
-            background: radial-gradient(circle at center, #1a2a22 0%, #0a0a0a 70%);
+            padding: 100px 20px;
+            background: radial-gradient(circle at 50% 50%, #1f2e26 0%, #0f0f0f 70%);
         }
 
         .hero h1 {
-            font-size: 3rem;
+            font-size: 3.5rem; /* 제목 더 크게 */
             margin: 0;
-            line-height: 1.2;
+            line-height: 1.1;
         }
-        
+
         .hero span {
             color: var(--main-color);
         }
 
         .hero p {
-            color: var(--text-gray);
-            margin-top: 15px;
-            font-size: 1.1rem;
+            color: var(--text-sub);
+            font-size: 1.2rem;
+            margin-top: 20px;
+            font-weight: 300;
         }
 
-        /* 카테고리 탭 (로블록스 스타일) */
-        .category-bar {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            padding: 20px;
-            flex-wrap: wrap;
-        }
-
-        .cat-btn {
-            background: transparent;
-            border: 1px solid #333;
-            color: var(--text-gray);
-            padding: 10px 20px;
-            border-radius: 30px;
-            cursor: pointer;
-            transition: 0.3s;
-            font-weight: bold;
-        }
-
-        .cat-btn:hover, .cat-btn.active {
-            background: var(--main-color);
-            color: black;
-            border-color: var(--main-color);
-            box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
-        }
-
-        /* 게임 그리드 */
+        /* 메인 컨텐츠 영역 */
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 40px 20px;
         }
 
+        /* 게임 그리드 */
         .game-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 25px;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* 카드 크기 키움 */
+            gap: 30px;
         }
 
-        /* 게임 카드 (업그레이드) */
         .game-card {
             background: var(--card-bg);
-            border-radius: 16px;
+            border-radius: 20px;
             overflow: hidden;
             text-decoration: none;
             color: white;
-            transition: all 0.3s ease;
-            position: relative;
-            border: 1px solid #222;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 1px solid #333;
+            display: block;
         }
 
         .game-card:hover {
-            transform: translateY(-8px);
+            transform: translateY(-10px);
             border-color: var(--main-color);
-            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.15);
+            box-shadow: 0 10px 40px rgba(0, 255, 157, 0.2);
         }
 
-        .thumb-wrapper {
-            position: relative;
+        .thumb-area {
             width: 100%;
-            padding-top: 100%; /* 1:1 정사각형 비율 */
-            background: #222;
+            height: 200px;
+            background-color: #222;
+            position: relative;
         }
-
-        .game-thumb {
-            position: absolute;
-            top: 0;
-            left: 0;
+        
+        .thumb-area img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
 
-        .play-icon {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0);
-            font-size: 3rem;
-            color: white;
-            transition: 0.3s;
-            text-shadow: 0 0 10px black;
-        }
-
-        .game-card:hover .play-icon {
-            transform: translate(-50%, -50%) scale(1);
-        }
-
         .game-info {
-            padding: 15px;
+            padding: 20px;
         }
 
         .game-title {
-            font-size: 1.1rem;
-            font-weight: bold;
-            margin: 0 0 5px 0;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            font-size: 1.4rem; /* 게임 제목 키움 */
+            margin: 0;
+            margin-bottom: 5px;
+            font-family: 'Black Han Sans', sans-serif;
         }
 
-        .game-meta {
-            font-size: 0.8rem;
-            color: var(--text-gray);
-            display: flex;
-            justify-content: space-between;
+        .game-desc {
+            font-size: 0.9rem;
+            color: var(--text-sub);
         }
 
-        .tag {
-            background: #333;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.7rem;
-        }
-
-        /* 광고 영역 */
-        .ad-banner {
-            width: 100%;
-            max-width: 728px;
-            height: 90px;
-            background: #111;
-            margin: 50px auto;
-            border: 1px dashed #444;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        /* 저작권 푸터 */
+        footer {
+            margin-top: 100px;
+            padding: 60px 20px;
+            border-top: 1px solid #222;
+            text-align: center;
             color: #555;
-            border-radius: 8px;
+            font-size: 0.8rem;
         }
 
-        /* 모바일 최적화 */
-        @media (max-width: 600px) {
-            .hero h1 { font-size: 2rem; }
-            .game-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
-            .logo { font-size: 1.5rem; }
+        .footer-logo {
+            font-family: 'Black Han Sans', sans-serif;
+            font-size: 1.5rem;
+            color: #444;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        /* 모바일 대응 */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.2rem; }
+            .game-grid { grid-template-columns: 1fr; } /* 모바일은 1줄로 */
         }
     </style>
 </head>
@@ -220,87 +170,50 @@
 
     <nav>
         <a href="#" class="logo">FUNLET</a>
-        <div class="user-menu"><i class="fa-solid fa-user"></i> Guest</div>
+        <div style="color:white; font-size:0.9rem;">
+            <i class="fa-solid fa-earth-americas"></i> Global
+        </div>
     </nav>
 
     <div class="hero">
-        <h1>Play Instantly,<br><span>No Download</span></h1>
-        <p>설치 없이 바로 즐기는 무료 게임 월드</p>
-    </div>
-
-    <div class="category-bar">
-        <button class="cat-btn active">🔥 All</button>
-        <button class="cat-btn">⚔️ Action</button>
-        <button class="cat-btn">🧩 Puzzle</button>
-        <button class="cat-btn">💰 Tycoon</button>
+        <h1>PLAY BEYOND<br><span>IMAGINATION</span></h1>
+        <p>설치 없이, 로그인 없이, 무한한 즐거움.</p>
     </div>
 
     <div class="container">
-        
+        <h2 style="margin-bottom: 30px; font-size: 1.8rem;">🔥 트렌딩 게임</h2>
+
         <div class="game-grid">
             
             <a href="./game1/index.html" class="game-card">
-                <div class="thumb-wrapper">
-                    <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=500&q=80" class="game-thumb" alt="Neon Breaker">
-                    <i class="fa-solid fa-play play-icon"></i>
+                <div class="thumb-area">
+                    <img src="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=500&q=80" alt="Money Clicker">
                 </div>
                 <div class="game-info">
-                    <h3 class="game-title">Neon Breaker</h3>
-                    <div class="game-meta">
-                        <span>네온 벽돌 깨기</span>
-                        <span class="tag">Arcade</span>
-                    </div>
+                    <h3 class="game-title">MONEY CLICKER</h3>
+                    <div class="game-desc">나만의 제국을 건설하세요. (자동 저장)</div>
                 </div>
             </a>
 
-            <a href="#" class="game-card" onclick="alert('Coming Soon! 곧 오픈됩니다.')">
-                <div class="thumb-wrapper">
-                    <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=500&q=80" class="game-thumb" alt="School Tycoon">
-                    <i class="fa-solid fa-lock play-icon"></i>
+            <a href="#" class="game-card" style="opacity: 0.5; cursor: default;">
+                <div class="thumb-area" style="display:flex; align-items:center; justify-content:center;">
+                    <span style="font-size:3rem; color:#444;">?</span>
                 </div>
                 <div class="game-info">
-                    <h3 class="game-title">School Tycoon</h3>
-                    <div class="game-meta">
-                        <span>학교 매점 키우기</span>
-                        <span class="tag">Idle</span>
-                    </div>
+                    <h3 class="game-title">COMING SOON</h3>
+                    <div class="game-desc">매주 새로운 게임이 공개됩니다.</div>
                 </div>
             </a>
 
-            <a href="#" class="game-card" onclick="alert('Coming Soon!')">
-                <div class="thumb-wrapper">
-                    <img src="https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=500&q=80" class="game-thumb" alt="Jump Master">
-                    <i class="fa-solid fa-lock play-icon"></i>
-                </div>
-                <div class="game-info">
-                    <h3 class="game-title">Sky Jump</h3>
-                    <div class="game-meta">
-                        <span>무한의 점프</span>
-                        <span class="tag">Obby</span>
-                    </div>
-                </div>
-            </a>
-
-             <a href="#" class="game-card" style="opacity:0.5;">
-                <div class="thumb-wrapper">
-                    <div style="width:100%; height:100%; background:#222; display:flex; align-items:center; justify-content:center; color:#555;">
-                        Thinking...
-                    </div>
-                </div>
-                <div class="game-info">
-                    <h3 class="game-title">More Games...</h3>
-                    <div class="game-meta">
-                        <span>매주 업데이트</span>
-                    </div>
-                </div>
-            </a>
-
-        </div>
-
-        <div class="ad-banner">
-            ADVERTISEMENT AREA
         </div>
     </div>
 
+    <footer>
+        <span class="footer-logo">FUNLET</span>
+        <p>Copyright © 2025 Funlet Platform. All rights reserved.</p>
+        <p>Contact: admin@funlet.io | Terms of Service | Privacy Policy</p>
+    </footer>
+
 </body>
 </html>
+
