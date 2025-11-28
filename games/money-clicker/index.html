@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Money Tycoon - 캐릭터 키우기</title>
+    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #00ff9d; --bg: #111; --panel: #1e1e1e; }
+        body { margin:0; background:var(--bg); color:white; font-family:'Noto Sans KR'; overflow:hidden; user-select:none; }
+        
+        /* 레이아웃 */
+        .game-container { display:flex; height:100vh; }
+        
+        /* 왼쪽: 캐릭터 영역 */
+        .play-area { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; background: radial-gradient(circle, #333 0%, #000 100%); }
+        
+        .stats-box { text-align:center; margin-bottom:20px; z-index:10; }
+        .money { font-family:'Black Han Sans'; font-size:2.5rem; color:var(--primary); text-shadow:0 0 10px rgba(0,255,157,0.3); }
+        .cps { color:#aaa; font-size:0.9rem; }
+
+        /* 캐릭터 (클릭 버튼) */
+        .character-btn {
+            width: 250px; height: 250px;
+            cursor: pointer; transition: 0.1s;
+            position: relative; z-index: 5;
+        }
+        .character-btn img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 0 10px rgba(255,255,255,0.2)); }
+        .character-btn:active { transform: scale(0.95); }
+
+        /* 광고 배너 (게임 하단) */
+        .ad-banner-area {
+            position: absolute; bottom: 10px;
+            width: 320px; height: 100px;
+            background: rgba(0,0,0,0.5);
+            border: 1px dashed #444;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* 오른쪽: 상점 */
+        .shop-area { width: 350px; background: var(--panel); border-left: 1px solid #333; display: flex; flex-direction: column; }
+        .shop-header { padding: 15px; font-family: 'Black Han Sans'; text-align: center; background: #252525; font-size: 1.2rem; }
+        .shop-list { flex: 1; overflow-y: auto; padding: 10px; }
+
+        /* 아이템 스타일 (이미지 적용) */
+        .item { display: flex; align-items: center; background: #2c2c2c; padding: 10px; margin-bottom: 8px; border-radius: 8px; cursor: pointer; border: 2px solid transparent; }
+        .item:hover { background: #353535; }
+        .item.can-buy { border-color: var(--primary); }
+        
+        .item-img { width: 40px; height: 40px; margin-right: 10px; background: #000; border-radius: 5px; overflow: hidden; }
+        .item-img img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .item-info { flex: 1; }
+        .item-name { font-weight: bold; font-size: 0.9rem; }
+        .item-cost { color: var(--primary); font-size: 0.9rem; }
+        .item-count { background: #555; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; margin-left: auto; }
+
+        /* 클릭 이펙트 */
+        .float-num { position: absolute; color: white; font-weight: bold; font-size: 1.2rem; pointer-events: none; animation: floatUp 0.8s forwards; }
+        @keyframes floatUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-50px); opacity: 0; } }
+
+        @media (max-width: 768px) {
+            .game-container { flex-direction: column; }
+            .shop-area { width: 100%; height: 40%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <div class="play-area">
+            <div class="stats-box">
+                <div class="money" id="moneyDisplay">0원</div>
+                <div class="cps" id="cpsDisplay">초당 0원 수익 중</div>
+            </div>
+
+            <div class="character-btn" id="clickTarget">
+                <img id="charImg" src="https://cdn-icons-png.flaticon.com/512/616/616408.png" alt="Character">
+            </div>
+
+            <div class="ad-banner-area" id="ad-game-bottom">
+                <span style="font-size:0.7rem; color:#888;">광고 로딩 중...</span>
+            </div>
+        </div>
+
+        <div class="shop-area">
+            <div class="shop-header">🛒 업그레이드 상점</div>
+            <div class="shop-list" id="shopList"></div>
+        </div>
+    </div>
+
+    <script src="../../js/ads.js"></script>
+
+    <script>
+        // 게임 데이터 (이미지 URL을 여기에 넣으세요)
+        let game = {
+            money: 0,
+            mps: 0, // 초당 수익 (Money Per Second)
+            clickPower: 1,
+            // 사장님이 원하는 이미지로 url 부분만 바꾸면 됩니다.
+            items: [
+                { name: "트랄랄라 댄스", cost: 50, value: 5, count: 0, url: "https://cdn-icons-png.flaticon.com/512/3083/3083393.png" },
+                { name: "유튜버 방송장비", cost: 500, value: 30, count: 0, url: "https://cdn-icons-png.flaticon.com/512/3163/3163478.png" },
+                { name: "구독자 10만명", cost: 2000, value: 100, count: 0, url: "https://cdn-icons-png.flaticon.com/512/4406/4406256.png" },
+                { name: "AI 캐릭터 개발", cost: 10000, value: 500, count: 0, url: "https://cdn-icons-png.flaticon.com/512/2040/2040946.png" },
+                { name: "글로벌 서버 증설", cost: 50000, value: 2500, count: 0, url: "https://cdn-icons-png.flaticon.com/512/2504/2504789.png" }
+            ]
+        };
+
+        // 저장된 데이터 불러오기
+        if(localStorage.getItem('moneyV2')) {
+            const saved = JSON.parse(localStorage.getItem('moneyV2'));
+            // 기존 데이터에 덮어쓰기 (버그 방지용 안전 장치)
+            game.money = saved.money || 0;
+            if(saved.items) {
+                saved.items.forEach((savedItem, i) => {
+                    if(game.items[i]) game.items[i].count = savedItem.count;
+                });
+            }
+        }
+
+        const ui = {
+            money: document.getElementById('moneyDisplay'),
+            cps: document.getElementById('cpsDisplay'),
+            shop: document.getElementById('shopList'),
+            charImg: document.getElementById('charImg')
+        };
+
+        // 수익 계산 (버그 수정된 핵심 로직)
+        function calcMPS() {
+            let total = 0;
+            game.items.forEach(item => {
+                total += (item.value * item.count);
+            });
+            game.mps = total;
+            
+            // 시각적 재미: 돈 많이 벌면 캐릭터가 바뀜 (예시)
+            if(game.mps > 1000) ui.charImg.src = "https://cdn-icons-png.flaticon.com/512/4712/4712109.png"; // 부자 캐릭터로 변경
+        }
+
+        function updateUI() {
+            ui.money.innerText = Math.floor(game.money).toLocaleString() + "원";
+            ui.cps.innerText = "초당 " + game.mps.toLocaleString() + "원 버는 중";
+            renderShop();
+        }
+
+        function renderShop() {
+            ui.shop.innerHTML = "";
+            game.items.forEach((item, idx) => {
+                const el = document.createElement('div');
+                el.className = "item" + (game.money >= item.cost ? " can-buy" : "");
+                el.innerHTML = `
+                    <div class="item-img"><img src="${item.url}"></div>
+                    <div class="item-info">
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-cost">${item.cost.toLocaleString()}원</div>
+                    </div>
+                    <div class="item-count">x${item.count}</div>
+                `;
+                el.onclick = () => buyItem(idx);
+                ui.shop.appendChild(el);
+            });
+        }
+
+        function buyItem(idx) {
+            const item = game.items[idx];
+            if(game.money >= item.cost) {
+                game.money -= item.cost;
+                item.count++;
+                item.cost = Math.floor(item.cost * 1.5); // 가격 증가
+                calcMPS(); // 수익 재계산 (중요!)
+                save();
+                updateUI();
+                
+                // 구매 효과음 넣을 수 있음
+            }
+        }
+
+        function save() {
+            localStorage.setItem('moneyV2', JSON.stringify(game));
+        }
+
+        // 클릭 이벤트
+        document.getElementById('clickTarget').addEventListener('mousedown', (e) => {
+            game.money += game.clickPower + (game.mps * 0.01); // 클릭 시 약간의 보너스
+            updateUI();
+            
+            // 숫자 둥둥 뜨는 효과
+            const float = document.createElement('div');
+            float.className = 'float-num';
+            float.innerText = "+" + (game.clickPower + Math.floor(game.mps*0.01));
+            float.style.left = e.clientX + 'px';
+            float.style.top = e.clientY + 'px';
+            document.body.appendChild(float);
+            setTimeout(() => float.remove(), 800);
+        });
+
+        // 1초 루프 (자동 수익)
+        setInterval(() => {
+            if(game.mps > 0) {
+                game.money += (game.mps / 10); // 0.1초마다 1/10씩 증가 (부드럽게)
+                updateUI();
+                save(); // 자동 저장
+            }
+        }, 100);
+
+        // 초기화
+        calcMPS();
+        updateUI();
+
+    </script>
+</body>
+</html>
