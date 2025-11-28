@@ -3,222 +3,333 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FUNLET 통합 관리자 V3</title>
+    <title>FUNLET 마스터 관리자 V4</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background: #111; color: white; font-family: 'Noto Sans KR'; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .container { width: 500px; background: #222; padding: 30px; border-radius: 20px; box-shadow: 0 0 20px rgba(0,255,157,0.2); border: 1px solid #333; }
+        body { background: #111; color: white; font-family: 'Noto Sans KR'; padding: 20px; margin: 0; }
+        .container { max-width: 800px; margin: 0 auto; background: #222; padding: 30px; border-radius: 20px; border: 1px solid #333; }
         h2 { text-align: center; color: #00ff9d; margin-bottom: 30px; }
         
-        .section { margin-bottom: 25px; padding: 15px; background: #2a2a2a; border-radius: 10px; border: 1px solid #444; }
-        label { display: block; margin-bottom: 8px; font-weight: bold; color: #ccc; font-size: 0.9rem; }
-        input, select { width: 100%; padding: 12px; background: #111; border: 1px solid #555; color: white; border-radius: 8px; box-sizing: border-box; margin-bottom: 10px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #ccc; }
+        input, select { width: 100%; padding: 12px; background: #333; border: 1px solid #555; color: white; border-radius: 8px; box-sizing: border-box; }
         
-        button { width: 100%; padding: 15px; background: #00ff9d; color: black; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; }
+        /* 탭 디자인 */
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #444; padding-bottom: 10px; }
+        .tab-btn { flex: 1; padding: 10px; background: transparent; border: none; color: #888; cursor: pointer; font-size: 1.1rem; font-weight: bold; }
+        .tab-btn.active { color: #00ff9d; border-bottom: 3px solid #00ff9d; }
+        
+        /* 파일 리스트 그리드 */
+        .file-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; margin-top: 15px; }
+        .file-card { background: #2a2a2a; border: 1px solid #444; border-radius: 10px; padding: 10px; text-align: center; cursor: pointer; transition: 0.2s; }
+        .file-card:hover { border-color: #00ff9d; transform: translateY(-3px); }
+        .file-card img { width: 100%; height: 100px; object-fit: contain; background: #000; border-radius: 5px; margin-bottom: 10px; }
+        .file-name { font-size: 0.8rem; color: #ddd; word-break: break-all; }
+        
+        /* 링크 에디터 스타일 */
+        .link-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; background: #2a2a2a; padding: 10px; border-radius: 8px; }
+        .link-key { width: 30%; font-weight: bold; color: #00ff9d; }
+        
+        button { padding: 10px 20px; background: #00ff9d; color: black; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
         button:hover { background: #00cc7d; }
-        
-        .status { margin-top: 20px; padding: 15px; background: #333; border-radius: 8px; font-size: 0.9rem; color: #aaa; word-break: break-all; display: none; }
-        .current-info { font-size: 0.8rem; color: #00ff9d; margin-bottom: 10px; }
+        .btn-upload { width: 100%; margin-top: 10px; font-size: 1.1rem; padding: 15px; }
+
+        .hidden { display: none; }
+        .loading { text-align: center; color: #888; padding: 20px; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h2>🔧 FUNLET 배너 관리자</h2>
+        <h2>🔧 FUNLET 완전 자동 관리자</h2>
 
-        <div class="form-group" style="margin-bottom: 20px;">
-            <label>🔑 관리자 토큰</label>
+        <div class="form-group">
+            <label>🔑 관리자 토큰 (자동 저장됨)</label>
             <input type="password" id="token" placeholder="ghp_..." onchange="saveToken()">
         </div>
 
-        <div class="section">
-            <label>1. 수정할 배너 선택</label>
-            <select id="bannerSelect" onchange="loadCurrentData()">
-                <option value="">-- 선택하세요 --</option>
-                <option value="mainTop">🖥️ 메인 상단 배너 (PC)</option>
-                <option value="sidebar">▐ 사이드바 배너</option>
-                <option value="gameBottom">📱 게임 하단 배너 (모바일)</option>
-                <option value="hero">✨ 메인 타이틀 배경 (Hero)</option>
-            </select>
-            <div id="currentData" class="current-info"></div>
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('files')">📂 이미지 관리 (자동 스캔)</button>
+            <button class="tab-btn" onclick="switchTab('links')">🔗 배너 링크 관리</button>
         </div>
 
-        <div class="section">
-            <label>2. 연결할 주소 (링크 URL)</label>
-            <input type="text" id="linkUrl" placeholder="예: https://google.com">
-            
-            <label style="margin-top:15px;">3. 새 이미지 업로드 (선택사항)</label>
-            <input type="file" id="fileInput" accept="image/*">
-            <p style="font-size:0.8rem; color:#888;">* 이미지를 선택하지 않으면 링크만 수정됩니다.</p>
+        <div id="tab-files">
+            <div class="form-group">
+                <label>1. 폴더 선택 (GitHub에서 실시간 조회)</label>
+                <select id="folderSelect" onchange="loadFiles(this.value)">
+                    <option value="">토큰을 입력하고 기다려주세요...</option>
+                </select>
+                <button onclick="scanFolders()" style="margin-top:5px; background:#444; color:white; width:auto; padding:5px 10px; font-size:0.8rem;">🔄 폴더 목록 새로고침</button>
+            </div>
+
+            <div id="fileListArea">
+                <label>2. 교체할 이미지를 선택하세요</label>
+                <div id="fileGrid" class="file-grid">
+                    <div class="loading">폴더를 선택하면 파일이 뜹니다.</div>
+                </div>
+            </div>
+
+            <div id="uploadForm" class="hidden" style="margin-top:20px; border-top:1px solid #444; padding-top:20px;">
+                <h3 style="color:white;">🔄 이미지 교체하기</h3>
+                <p>선택된 파일: <b id="selectedFileName" style="color:#00ff9d;"></b></p>
+                <input type="file" id="fileInput" accept="image/*">
+                <button class="btn-upload" onclick="uploadImage()">서버에 덮어쓰기</button>
+            </div>
         </div>
 
-        <button onclick="updateBanner()" id="uploadBtn">저장하기</button>
-        <div class="status" id="statusBox"></div>
+        <div id="tab-links" class="hidden">
+            <p style="color:#aaa; font-size:0.9rem;">* ads.json 파일에 있는 모든 배너 링크를 자동으로 불러옵니다.</p>
+            <div id="linkList">
+                <div class="loading">데이터 로딩 중...</div>
+            </div>
+            <button class="btn-upload" onclick="saveLinks()">모든 링크 저장하기</button>
+        </div>
+
     </div>
 
     <script>
         const USER = 'fun-let';
         const REPO = 'funlet';
-        
-        // 내부 관리용 파일명 매핑
-        const FILE_MAP = {
-            'mainTop': 'banner_main_pc.png',
-            'sidebar': 'banner_sidebar.png',
-            'gameBottom': 'banner_game_bottom.png',
-            'hero': 'bg_hero.png'
-        };
-
-        let currentJsonData = {}; // 불러온 JSON 데이터 임시 저장
-        let currentSha = null;    // JSON 파일의 SHA (수정 권한용)
+        let currentPath = '';
+        let currentAdsData = {};
+        let adsSha = null;
 
         window.onload = () => {
-            const savedToken = localStorage.getItem('github_token');
-            if(savedToken) document.getElementById('token').value = savedToken;
-            fetchJsonData(); // 접속하자마자 현재 설정 불러오기
+            const t = localStorage.getItem('github_token');
+            if(t) {
+                document.getElementById('token').value = t;
+                scanFolders(); // 시작하자마자 폴더 스캔
+            }
         }
 
         function saveToken() {
             localStorage.setItem('github_token', document.getElementById('token').value);
-            fetchJsonData();
+            scanFolders();
         }
 
-        // GitHub에서 현재 JSON 데이터 가져오기
-        async function fetchJsonData() {
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if(tab === 'files') {
+                document.getElementById('tab-files').classList.remove('hidden');
+                document.getElementById('tab-links').classList.add('hidden');
+            } else {
+                document.getElementById('tab-files').classList.add('hidden');
+                document.getElementById('tab-links').classList.remove('hidden');
+                loadLinks(); // 탭 전환 시 링크 데이터 로드
+            }
+        }
+
+        // ==========================================
+        // 1. 폴더 및 파일 자동 스캔 기능
+        // ==========================================
+        async function scanFolders() {
             const token = document.getElementById('token').value;
             if(!token) return;
+            const select = document.getElementById('folderSelect');
+            select.innerHTML = '<option>스캔 중...</option>';
+
+            try {
+                // images 폴더 안의 모든 것을 조회
+                const url = `https://api.github.com/repos/${USER}/${REPO}/contents/images`;
+                const res = await fetch(url, { headers: { Authorization: `token ${token}` } });
+                const data = await res.json();
+
+                select.innerHTML = '<option value="">-- 폴더를 선택하세요 --</option>';
+                // 루트(images/) 추가
+                select.innerHTML += `<option value="images/">images/ (기본 배너)</option>`;
+
+                // 하위 폴더 자동 추가
+                data.forEach(item => {
+                    if(item.type === 'dir') {
+                        select.innerHTML += `<option value="${item.path}/">${item.path}/</option>`;
+                    }
+                });
+            } catch(e) {
+                alert("폴더 스캔 실패. 토큰을 확인하세요.");
+            }
+        }
+
+        async function loadFiles(path) {
+            if(!path) return;
+            currentPath = path;
+            const token = document.getElementById('token').value;
+            const grid = document.getElementById('fileGrid');
+            grid.innerHTML = '<div class="loading">파일 불러오는 중...</div>';
+            document.getElementById('uploadForm').classList.add('hidden');
+
+            try {
+                const url = `https://api.github.com/repos/${USER}/${REPO}/contents/${path}`;
+                const res = await fetch(url, { headers: { Authorization: `token ${token}` } });
+                const data = await res.json();
+
+                grid.innerHTML = '';
+                data.forEach(item => {
+                    if(item.type === 'file' && item.name.match(/\.(jpg|jpeg|png|gif)$/i)) {
+                        // 카드 생성
+                        const card = document.createElement('div');
+                        card.className = 'file-card';
+                        card.onclick = () => selectFile(item.name);
+                        card.innerHTML = `
+                            <img src="${item.download_url}?t=${new Date().getTime()}">
+                            <div class="file-name">${item.name}</div>
+                        `;
+                        grid.appendChild(card);
+                    }
+                });
+                
+                if(grid.innerHTML === '') grid.innerHTML = '<div class="loading">이미지 파일이 없습니다.</div>';
+
+            } catch(e) {
+                grid.innerHTML = '<div class="loading">불러오기 실패</div>';
+            }
+        }
+
+        function selectFile(name) {
+            document.getElementById('uploadForm').classList.remove('hidden');
+            document.getElementById('selectedFileName').innerText = name;
+            // 스크롤 이동
+            document.getElementById('uploadForm').scrollIntoView({behavior: "smooth"});
+        }
+
+        // ==========================================
+        // 2. 이미지 업로드 (덮어쓰기)
+        // ==========================================
+        async function uploadImage() {
+            const token = document.getElementById('token').value;
+            const fileName = document.getElementById('selectedFileName').innerText;
+            const fileInput = document.getElementById('fileInput');
+            
+            if(fileInput.files.length === 0) { alert("파일을 선택해주세요."); return; }
+
+            const file = fileInput.files[0];
+            const fullPath = currentPath + fileName; // 경로 + 파일명
+
+            if(!confirm(`[${fileName}] 파일을 정말 교체하시겠습니까?`)) return;
+
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = async function() {
+                const content = reader.result.split(',')[1];
+                
+                // 기존 파일 SHA 조회 (덮어쓰기 필수)
+                let sha = null;
+                try {
+                    const check = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/${fullPath}`, {
+                        headers: { Authorization: `token ${token}` }
+                    });
+                    const d = await check.json();
+                    sha = d.sha;
+                } catch(e) {}
+
+                // 업로드
+                try {
+                    const res = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/${fullPath}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `token ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            message: `Update ${fileName}`,
+                            content: content,
+                            sha: sha
+                        })
+                    });
+
+                    if(res.ok) {
+                        alert("성공! 이미지가 교체되었습니다.\n사이트 반영까지 1~2분 걸립니다.");
+                        loadFiles(currentPath); // 목록 새로고침
+                    } else {
+                        alert("업로드 실패.");
+                    }
+                } catch(e) {
+                    alert("오류 발생: " + e);
+                }
+            };
+        }
+
+        // ==========================================
+        // 3. 배너 링크 관리 (JSON 자동 파싱)
+        // ==========================================
+        async function loadLinks() {
+            const token = document.getElementById('token').value;
+            const list = document.getElementById('linkList');
+            list.innerHTML = '<div class="loading">데이터 불러오는 중...</div>';
 
             try {
                 const url = `https://api.github.com/repos/${USER}/${REPO}/contents/data/ads.json`;
-                const response = await fetch(url, { headers: { Authorization: `token ${token}` } });
-                const data = await response.json();
+                const res = await fetch(url, { headers: { Authorization: `token ${token}` } });
+                const data = await res.json();
                 
-                currentSha = data.sha;
-                // Base64 디코딩 (한글 깨짐 방지)
-                const decodedContent = new TextDecoder().decode(Uint8Array.from(atob(data.content), c => c.charCodeAt(0)));
-                currentJsonData = JSON.parse(decodedContent);
-                console.log("데이터 로드 완료:", currentJsonData);
-            } catch (e) {
-                console.error("데이터 로드 실패:", e);
-            }
-        }
+                adsSha = data.sha;
+                const decoded = new TextDecoder().decode(Uint8Array.from(atob(data.content), c => c.charCodeAt(0)));
+                currentAdsData = JSON.parse(decoded);
 
-        // 선택 시 현재 상태 표시
-        function loadCurrentData() {
-            const key = document.getElementById('bannerSelect').value;
-            const linkInput = document.getElementById('linkUrl');
-            const infoBox = document.getElementById('currentData');
+                list.innerHTML = '';
+                // JSON의 모든 키를 자동으로 루프 돌면서 입력창 생성
+                for (const [key, value] of Object.entries(currentAdsData)) {
+                    // 키 이름 좀 더 예쁘게 보여주기
+                    let labelName = key;
+                    if(key === 'hero') labelName = '✨ 메인 타이틀 (Hero)';
+                    if(key === 'mainTop') labelName = '🖥️ 메인 상단 배너';
+                    if(key === 'gameBottom') labelName = '📱 게임 하단 배너';
+                    if(key === 'sidebar') labelName = '▐ 사이드바 배너';
 
-            if (key && currentJsonData[key]) {
-                linkInput.value = currentJsonData[key].link || "";
-                infoBox.innerText = `현재 링크: ${currentJsonData[key].link || "없음"}`;
-            } else {
-                linkInput.value = "";
-                infoBox.innerText = "";
-            }
-        }
-
-        // [핵심] 업데이트 실행
-        async function updateBanner() {
-            const token = document.getElementById('token').value;
-            const key = document.getElementById('bannerSelect').value;
-            const linkUrl = document.getElementById('linkUrl').value;
-            const fileInput = document.getElementById('fileInput');
-            const statusBox = document.getElementById('statusBox');
-            const btn = document.getElementById('uploadBtn');
-
-            if (!key) { alert("수정할 배너를 선택해주세요."); return; }
-
-            btn.disabled = true;
-            statusBox.style.display = 'block';
-            statusBox.innerText = "처리 중...";
-
-            try {
-                let imageUrl = currentJsonData[key]?.image || "";
-
-                // 1. 이미지가 선택되었다면 먼저 업로드
-                if (fileInput.files.length > 0) {
-                    statusBox.innerText = "이미지 업로드 중...";
-                    const file = fileInput.files[0];
-                    const fileName = FILE_MAP[key];
-                    const content = await readFileAsBase64(file);
-                    
-                    // 이미지 업로드 API 호출
-                    await uploadFileToGitHub(token, `images/${fileName}`, content);
-                    
-                    // 새 이미지 주소 생성 (캐시 방지 추가)
-                    imageUrl = `https://${USER}.github.io/${REPO}/images/${fileName}?v=${new Date().getTime()}`;
+                    const row = document.createElement('div');
+                    row.className = 'link-row';
+                    row.innerHTML = `
+                        <div class="link-key">${labelName}</div>
+                        <input type="text" id="link-${key}" value="${value.link || '#'}" placeholder="이동할 주소 입력 (https://...)">
+                    `;
+                    list.appendChild(row);
                 }
 
-                // 2. JSON 데이터 업데이트
-                statusBox.innerText = "설정 저장 중...";
-                
-                // 데이터 수정
-                if (!currentJsonData[key]) currentJsonData[key] = {};
-                currentJsonData[key].link = linkUrl;
-                currentJsonData[key].image = imageUrl;
-
-                // JSON 파일 업로드
-                const jsonContent = btoa(unescape(encodeURIComponent(JSON.stringify(currentJsonData, null, 2))));
-                await uploadFileToGitHub(token, 'data/ads.json', jsonContent, currentSha);
-
-                // SHA 갱신 (연속 수정을 위해)
-                await fetchJsonData();
-
-                statusBox.innerHTML = `✅ <b>완료!</b><br>이미지와 링크가 수정되었습니다.<br>약 1분 뒤 사이트에 반영됩니다.`;
-                alert("수정되었습니다!");
-
-            } catch (error) {
-                statusBox.innerText = "❌ 오류: " + error.message;
-            } finally {
-                btn.disabled = false;
+            } catch(e) {
+                list.innerHTML = '<div class="loading">불러오기 실패. ads.json 파일이 있는지 확인하세요.</div>';
             }
         }
 
-        // 파일 읽기 헬퍼
-        function readFileAsBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result.split(',')[1]);
-                reader.onerror = error => reject(error);
-            });
-        }
-
-        // GitHub 업로드 헬퍼
-        async function uploadFileToGitHub(token, path, content, sha = null) {
-            let fileSha = sha;
+        async function saveLinks() {
+            const token = document.getElementById('token').value;
             
-            // SHA가 없으면(이미지 덮어쓰기 시) 먼저 파일 정보를 조회해서 SHA를 얻음
-            if (!fileSha) {
-                try {
-                    const check = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/${path}`, {
-                        headers: { Authorization: `token ${token}` }
-                    });
-                    if (check.ok) {
-                        const data = await check.json();
-                        fileSha = data.sha;
-                    }
-                } catch (e) {}
+            // 입력된 값으로 데이터 업데이트
+            for (const key of Object.keys(currentAdsData)) {
+                const input = document.getElementById(`link-${key}`);
+                if(input) {
+                    currentAdsData[key].link = input.value;
+                }
             }
 
-            const bodyData = {
-                message: `Update ${path} via Admin`,
-                content: content
-            };
-            if (fileSha) bodyData.sha = fileSha;
+            // JSON 저장
+            try {
+                const content = btoa(unescape(encodeURIComponent(JSON.stringify(currentAdsData, null, 2))));
+                const url = `https://api.github.com/repos/${USER}/${REPO}/contents/data/ads.json`;
+                
+                const res = await fetch(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: "Update Links via Admin V4",
+                        content: content,
+                        sha: adsSha
+                    })
+                });
 
-            const res = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/${path}`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `token ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(bodyData)
-            });
-
-            if (!res.ok) {
-                const err = await res.json();
-                throw new Error(err.message);
+                if(res.ok) {
+                    const d = await res.json();
+                    adsSha = d.content.sha; // SHA 갱신
+                    alert("링크 저장 완료! 바로 적용됩니다.");
+                } else {
+                    alert("저장 실패");
+                }
+            } catch(e) {
+                alert("오류: " + e);
             }
         }
     </script>
