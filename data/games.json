@@ -40,5 +40,12 @@
     "category": "idle",
     "desc": "키우기/IDLE",
     "thumb": "images/tanghulu/tanghulu_thumb.jpg"
+  },
+  {
+    "id": "magic-survivor",
+    "title": "매직 서바이버",
+    "category": "action",
+    "desc": "액션/아케이드",
+    "thumb": ""
   }
 ]
