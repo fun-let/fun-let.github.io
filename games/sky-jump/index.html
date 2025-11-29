@@ -240,6 +240,10 @@
             document.getElementById('gameOverScreen').style.display = 'flex';
         }
 
+// ▼▼▼ [추가] 이 한 줄이면 전면광고가 뜹니다! ▼▼▼
+            if(window.showInterstitial) window.showInterstitial(); 
+        }
+
         const handleDown = (left) => { if(left) keys.left = true; else keys.right = true; };
         const handleUp = () => { keys.left = false; keys.right = false; };
         
