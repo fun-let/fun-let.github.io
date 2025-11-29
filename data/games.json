@@ -1,0 +1,30 @@
+[
+  {
+    "id": "money-clicker",
+    "title": "Money Tycoon",
+    "category": "idle",
+    "desc": "IDLE / 키우기",
+    "thumb": "images/thumbnails/money_tycoon_thumb.jpg"
+  },
+  {
+    "id": "pet-gacha",
+    "title": "Pet Gacha King",
+    "category": "simulation",
+    "desc": "Simulation / 뽑기",
+    "thumb": "images/pet-gacha/pet_gacha_thumb.jpg"
+  },
+  {
+    "id": "sky-jump",
+    "title": "Sky Jump",
+    "category": "action",
+    "desc": "Action / 점프맵",
+    "thumb": "images/sky-jump/sky_thumb.jpg"
+  },
+  {
+    "id": "telepathy",
+    "title": "우정 텔레파시",
+    "category": "social",
+    "desc": "Social / 심리테스트",
+    "thumb": "images/telepathy/telepathy_thumb.jpg"
+  }
+]
