@@ -47,22 +47,19 @@
     </style>
 </head>
 <body>
-    <div class="menu-overlay" onclick="toggleMenu()"></div>
-    <div class="app-container">
-        <nav class="sidebar" id="sidebar">
-            <a href="./index.html" class="logo"><i class="fa-solid fa-gamepad"></i> FUNLET</a>
-            <button onclick="toggleMenu()" style="position:absolute; top:20px; right:20px; background:none; border:none; color:white; font-size:1.5rem; cursor:pointer; display:none;" id="closeBtn"><i class="fa-solid fa-xmark"></i></button>
-            <div class="menu-label">MENU</div>
-            <a href="#" onclick="filterGames('all')" class="menu-item active"><i class="fa-solid fa-house"></i> 홈</a>
-            
-            <div class="menu-label" style="margin-top: 20px;">CATEGORY</div>
-            <a href="#" onclick="filterGames('idle')" class="menu-item"><i class="fa-solid fa-sack-dollar"></i> 키우기/IDLE</a>
-            <a href="#" onclick="filterGames('simulation')" class="menu-item"><i class="fa-solid fa-paw"></i> 시뮬레이션/뽑기</a>
-            <a href="#" onclick="filterGames('action')" class="menu-item"><i class="fa-solid fa-rocket"></i> 액션/아케이드</a>
-            <a href="#" onclick="filterGames('social')" class="menu-item"><i class="fa-solid fa-heart"></i> 소셜/심리</a>
-            
-            <div class="sidebar-ad" id="ad-sidebar"></div>
-        </nav>
+   <nav class="sidebar" id="sidebar">
+    <a href="./index.html" class="logo"><i class="fa-solid fa-gamepad"></i> FUNLET</a>
+    <button onclick="toggleMenu()" style="position:absolute; top:20px; right:20px; background:none; border:none; color:white; font-size:1.5rem; cursor:pointer; display:none;" id="closeBtn"><i class="fa-solid fa-xmark"></i></button>
+
+    <div class="menu-label">MENU</div>
+    <a href="#" onclick="filterGames('all')" class="menu-item active"><i class="fa-solid fa-house"></i> 홈</a>
+    
+    <div class="menu-label" style="margin-top: 20px;">CATEGORY</div>
+    
+    <div id="categoryMenu"></div> 
+
+    <div class="sidebar-ad" id="ad-sidebar"></div>
+</nav>
         <main class="main-content">
             <header class="top-header">
                 <div style="display:flex; align-items:center; width:100%;">
@@ -180,3 +177,4 @@
     </script>
 </body>
 </html>
+
