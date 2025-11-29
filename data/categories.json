@@ -1,7 +1,22 @@
 [
   {
-    "id": "puzzle",
-    "name": "퍼즐/두뇌",
-    "icon": ""
+    "id": "idle",
+    "name": "키우기/IDLE",
+    "icon": "fa-sack-dollar"
+  },
+  {
+    "id": "simulation",
+    "name": "시뮬레이션/뽑기",
+    "icon": "fa-paw"
+  },
+  {
+    "id": "action",
+    "name": "액션/아케이드",
+    "icon": "fa-rocket"
+  },
+  {
+    "id": "social",
+    "name": "소셜/심리",
+    "icon": "fa-heart"
   }
 ]
