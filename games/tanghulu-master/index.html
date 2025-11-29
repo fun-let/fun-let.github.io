@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>탕후루 마스터</title>
+    <title>탕후루 마스터 V2</title>
     <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        :root { --bg: #FFD1DC; --panel: #FFF0F5; --primary: #FF6B6B; }
+        :root { --bg: #FFF0F5; --primary: #FF6B6B; }
         body { margin: 0; background: var(--bg); font-family: 'Jua', sans-serif; overflow: hidden; user-select: none; display:flex; justify-content:center; height: 100vh; height: 100dvh; }
         
         #gameContainer {
@@ -19,236 +19,226 @@
         }
 
         /* 상단 정보 */
-        .header { padding: 20px; background: var(--panel); border-bottom: 2px solid #ffb7b2; display: flex; justify-content: space-between; align-items: center; }
-        .money-box { font-size: 1.5rem; color: #555; display: flex; align-items: center; gap: 5px; }
-        .money-val { color: var(--primary); font-size: 1.8rem; }
+        .header { padding: 15px; background: white; border-bottom: 2px solid #ffccd5; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
+        .money-box { font-size: 1.5rem; color: #555; }
+        .money-val { color: var(--primary); font-size: 1.8rem; margin-left: 5px; }
 
-        /* 메인 조리대 */
-        .kitchen { flex: 1; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
-        .chef { width: 150px; margin-bottom: 20px; cursor: pointer; transition: 0.1s; z-index: 10; }
-        .chef:active { transform: scale(0.95); }
-        .table { width: 80%; height: 10px; background: #ddd; border-radius: 50%; margin-top: -10px; z-index: 5; }
+        /* 메인 스테이지 (손님 & 조리대) */
+        .stage { flex: 1; position: relative; background-image: radial-gradient(#fff 20%, #ffe6eb 20%); background-size: 20px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         
-        /* 탕후루 애니메이션 */
-        .tanghulu { position: absolute; font-size: 2rem; animation: floatUp 1s forwards; pointer-events: none; z-index: 20; }
-        @keyframes floatUp { 0% { transform: translateY(0) scale(0.5); opacity: 0; } 50% { opacity: 1; } 100% { transform: translateY(-100px) scale(1.2); opacity: 0; } }
-
-        /* 하단 컨트롤 패널 */
-        .control-panel { background: var(--panel); padding: 15px; border-top: 2px solid #ffb7b2; height: 280px; display: flex; flex-direction: column; }
-        .buff-area { display: flex; gap: 10px; margin-bottom: 10px; }
-        .buff-btn { 
-            flex: 1; padding: 10px; border: none; border-radius: 10px; color: white; font-family: 'Jua'; cursor: pointer; 
-            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; font-size: 0.9rem;
-            box-shadow: 0 4px 0 rgba(0,0,0,0.2); transition: 0.1s;
+        /* 손님 */
+        .customer-area { position: relative; width: 200px; height: 250px; display: flex; justify-content: center; align-items: flex-end; }
+        .customer-img { width: 120px; transition: 0.3s; }
+        .bubble { 
+            position: absolute; top: 0; right: -20px; background: white; border: 3px solid #333; 
+            padding: 10px; border-radius: 20px; font-size: 1.2rem; min-width: 80px; text-align: center;
+            box-shadow: 5px 5px 0 rgba(0,0,0,0.1); animation: bounceIn 0.5s;
         }
-        .buff-btn:active { transform: translateY(4px); box-shadow: none; }
-        .btn-speed { background: #FF9F1C; }
-        .btn-gold { background: #4ECDC4; }
+        .bubble img { width: 40px; vertical-align: middle; }
 
-        /* 메뉴 리스트 */
-        .menu-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        .menu-item { 
-            background: white; padding: 10px; border-radius: 15px; border: 2px solid #eee; 
-            display: flex; align-items: center; cursor: pointer; transition: 0.2s;
+        /* 내 꼬치 (만드는 중) */
+        .my-stick { 
+            margin-top: 20px; width: 10px; height: 150px; background: #d2b48c; border-radius: 5px; 
+            position: relative; display: flex; flex-direction: column-reverse; align-items: center; justify-content: flex-start;
+            border: 2px solid #8b4513;
         }
-        .menu-item:hover { border-color: var(--primary); }
-        .menu-icon { width: 50px; height: 50px; background: #f0f0f0; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-right: 15px; }
-        .menu-info { flex: 1; }
-        .menu-name { font-size: 1.1rem; margin-bottom: 3px; }
-        .menu-price { color: #888; font-size: 0.9rem; }
-        .menu-level { background: #333; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem; }
+        .fruit-on-stick { width: 50px; height: 50px; object-fit: contain; margin-bottom: -10px; z-index: 5; animation: rubberBand 0.5s; }
 
-        /* 하단 배너 (필수) */
-        .ad-banner-area { height: 100px; background: #f8f8f8; border-top: 1px solid #ddd; flex-shrink: 0; display: flex; justify-content: center; align-items: center; }
+        /* 하단 컨트롤 (과일 버튼들) */
+        .controls { 
+            background: white; padding: 15px; border-top: 2px solid #ffccd5; 
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+            height: 220px; overflow-y: auto;
+        }
         
-        /* 팝업 메시지 */
-        .toast { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); color: white; padding: 15px 30px; border-radius: 20px; display: none; z-index: 100; text-align: center; }
+        .fruit-btn {
+            background: #fff; border: 2px solid #eee; border-radius: 15px; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; padding: 10px; transition: 0.1s; position: relative;
+        }
+        .fruit-btn:active { transform: scale(0.95); background: #f9f9f9; }
+        .fruit-btn img { width: 50px; height: 50px; object-fit: contain; margin-bottom: 5px; }
+        .fruit-name { font-size: 0.9rem; color: #555; }
+        .lock-mask { 
+            position: absolute; top:0; left:0; width:100%; height:100%; 
+            background: rgba(0,0,0,0.6); border-radius: 13px; color: white;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.8rem;
+        }
+
+        /* 하단 배너 */
+        .ad-banner-area { height: 100px; background: #f0f0f0; border-top: 1px solid #ddd; flex-shrink: 0; display:flex; justify-content:center; align-items:center; }
+
+        /* 피드백 효과 */
+        .feedback { position: absolute; font-size: 3rem; font-weight: bold; pointer-events: none; z-index: 100; animation: fadeOutUp 1s forwards; }
+        .success { color: #00ff9d; text-shadow: 2px 2px 0 #000; }
+        .fail { color: #ff4757; text-shadow: 2px 2px 0 #000; }
+        @keyframes fadeOutUp { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-50px); } }
     </style>
 </head>
 <body>
 
     <div id="gameContainer">
         <div class="header">
-            <div class="money-box">
-                <i class="fa-solid fa-won-sign" style="color:#FFD700;"></i>
-                <span class="money-val" id="money">0</span>
-            </div>
-            <div style="font-size:0.9rem; color:#888;">초당 수익: <span id="cps">0</span>원</div>
+            <div class="money-box">💰 <span class="money-val" id="money">0</span></div>
+            <button onclick="resetGame()" style="background:none; border:none; color:#aaa; cursor:pointer;">🔄 초기화</button>
         </div>
 
-        <div class="kitchen" onclick="clickChef(event)">
-            <img src="../../images/tanghulu/chef.png" class="chef" id="chefImg" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
-            <div style="font-size:5rem; display:none; cursor:pointer;">👩‍🍳</div>
-            <div class="table"></div>
-            <div style="position:absolute; bottom: 80px; color:#aaa; font-size:0.9rem;">화면을 탭해서 탕후루를 만드세요!</div>
-        </div>
-
-        <div class="control-panel">
-            <div class="buff-area">
-                <button class="buff-btn btn-speed" onclick="watchAd('speed')">
-                    <i class="fa-solid fa-bolt"></i> <span>2배 속도 (1분)</span>
-                    <small>📺 광고보기</small>
-                </button>
-                <button class="buff-btn btn-gold" onclick="watchAd('gold')">
-                    <i class="fa-solid fa-sack-dollar"></i> <span>지원금 받기</span>
-                    <small>📺 광고보기</small>
-                </button>
+        <div class="stage">
+            <div class="customer-area">
+                <div class="bubble" id="orderBubble">...</div>
+                <img src="../../images/tanghulu/customer.png" class="customer-img" id="customerImg" onerror="this.src='../../images/tanghulu/chef.png'">
             </div>
-
-            <div class="menu-list" id="menuList">
+            
+            <div class="my-stick" id="myStick">
                 </div>
+            <div style="margin-top:10px; color:#888; font-size:0.9rem;">주문에 맞춰 과일을 누르세요!</div>
         </div>
+
+        <div class="controls" id="fruitGrid">
+            </div>
 
         <div class="ad-banner-area" id="ad-game-bottom"></div>
     </div>
 
-    <div class="toast" id="toast">버프 발동! 판매 속도가 빨라집니다! 🔥</div>
+    <audio id="sfx-correct" src="../../audio/coin.mp3"></audio>
+    <audio id="sfx-wrong" src="../../audio/wrong.mp3"></audio> <script src="../../js/ads.js"></script>
 
-    <script src="../../js/ads.js"></script>
     <script>
-        // 게임 데이터
+        // 과일 데이터 (이미지 파일명과 매칭 중요!)
         const FRUITS = [
-            { name: "딸기 탕후루", base: 100, cps: 5, icon: "🍓" },
-            { name: "귤 탕후루", base: 500, cps: 20, icon: "🍊" },
-            { name: "샤인머스켓", base: 2000, cps: 80, icon: "🍇" },
-            { name: "블랙 사파이어", base: 8000, cps: 250, icon: "🍆" },
-            { name: "파인애플", base: 30000, cps: 800, icon: "🍍" },
-            { name: "오마카세 꼬치", base: 100000, cps: 3000, icon: "🍢" }
+            { id: 0, name: "딸기", price: 100, unlock: 0, img: "fruit_0.png" },
+            { id: 1, name: "귤", price: 300, unlock: 1000, img: "fruit_1.png" },
+            { id: 2, name: "샤인머스켓", price: 800, unlock: 3000, img: "fruit_2.png" },
+            { id: 3, name: "파인애플", price: 1500, unlock: 8000, img: "fruit_3.png" },
+            { id: 4, name: "블랙사파이어", price: 3000, unlock: 20000, img: "fruit_4.png" },
+            { id: 5, name: "오마카세", price: 10000, unlock: 50000, img: "fruit_5.png" }
         ];
 
         let game = {
             money: 0,
-            levels: [1, 0, 0, 0, 0, 0], // 각 과일 레벨 (0이면 미해금)
-            multiplier: 1 // 버프 배율
+            unlockedMax: 0 // 해금된 최고 레벨
         };
 
+        let currentOrder = 0; // 현재 손님이 원하는 과일 ID
+        let stickFruits = []; // 현재 꼬치에 꽂은 과일들 (지금은 1개만 꽂으면 성공하게 단순화)
+
         // 초기화
-        const saved = localStorage.getItem('tanghuluSave');
+        const saved = localStorage.getItem('tanghuluV2');
         if(saved) game = JSON.parse(saved);
         
-        // UI 갱신 루프
-        setInterval(() => {
-            let cps = 0;
-            game.levels.forEach((lv, i) => {
-                if(lv > 0) cps += (FRUITS[i].cps * lv);
-            });
-            
-            // 돈 증가 (버프 적용)
-            game.money += (cps * game.multiplier) / 10;
-            
-            updateUI(cps * game.multiplier);
-            localStorage.setItem('tanghuluSave', JSON.stringify(game));
-        }, 100);
+        renderFruits();
+        updateMoney();
+        newCustomer();
 
-        function updateUI(cps) {
-            document.getElementById('money').innerText = Math.floor(game.money).toLocaleString();
-            document.getElementById('cps').innerText = Math.floor(cps).toLocaleString();
-            renderMenu();
-        }
-
-        // 메뉴 그리기
-        function renderMenu() {
-            const list = document.getElementById('menuList');
-            list.innerHTML = "";
+        function renderFruits() {
+            const grid = document.getElementById('fruitGrid');
+            grid.innerHTML = "";
             
-            FRUITS.forEach((fruit, i) => {
-                const lv = game.levels[i];
-                const cost = Math.floor(fruit.base * Math.pow(1.5, lv));
-                const isLocked = (i > 0 && game.levels[i-1] === 0); // 이전 단계 안 샀으면 잠김
+            FRUITS.forEach((f, idx) => {
+                const btn = document.createElement('div');
+                btn.className = 'fruit-btn';
                 
-                if(!isLocked || lv > 0) { // 잠기지 않았거나 이미 샀으면 보여줌
-                    const div = document.createElement('div');
-                    div.className = 'menu-item';
-                    div.style.opacity = (game.money >= cost) ? '1' : '0.6';
-                    div.onclick = () => buyUpgrade(i, cost);
-                    div.innerHTML = `
-                        <div class="menu-icon">${fruit.icon}</div>
-                        <div class="menu-info">
-                            <div class="menu-name">${fruit.name} <span class="menu-level">Lv.${lv}</span></div>
-                            <div class="menu-price">비용: ${cost.toLocaleString()}원</div>
-                        </div>
-                        <div style="color:${game.money >= cost ? '#4ECDC4' : '#aaa'}">
-                            <i class="fa-solid fa-arrow-up"></i>
-                        </div>
-                    `;
-                    list.appendChild(div);
+                // 이미지 경로 주의 (../../images/tanghulu/...)
+                let html = `<img src="../../images/tanghulu/${f.img}" onerror="this.src='https://via.placeholder.com/50?text=?'">
+                            <div class="fruit-name">${f.name}</div>`;
+                
+                // 잠금 처리
+                if (idx > game.unlockedMax) {
+                    html += `<div class="lock-mask" onclick="unlockFruit(${idx}, ${f.unlock}, event)">
+                                <i class="fa-solid fa-lock"></i>
+                                <div>${f.unlock.toLocaleString()}원</div>
+                             </div>`;
+                } else {
+                    btn.onclick = () => addToStick(idx);
                 }
+                
+                btn.innerHTML = html;
+                grid.appendChild(btn);
             });
         }
 
-        function buyUpgrade(idx, cost) {
+        function unlockFruit(idx, cost, e) {
+            e.stopPropagation(); // 버튼 클릭 방지
             if(game.money >= cost) {
                 game.money -= cost;
-                game.levels[idx]++;
-                // 클릭 효과
-                createFloatText(`Lv UP!`, window.innerWidth/2, window.innerHeight/2);
-                updateUI(0); // 즉시 갱신
-            }
-        }
-
-        function clickChef(e) {
-            // 클릭 시 돈 벌기 (기본 10원 + 레벨 비례)
-            let clickVal = 10;
-            game.levels.forEach((lv, i) => clickVal += (lv * (i+1) * 2));
-            
-            game.money += clickVal;
-            createFloatText(`+${clickVal}`, e.clientX, e.clientY);
-            
-            // 탕후루 아이콘 튀어오르기
-            const fruit = document.createElement('div');
-            fruit.className = 'tanghulu';
-            fruit.innerText = FRUITS[Math.min(game.levels.filter(l=>l>0).length-1, FRUITS.length-1)].icon;
-            fruit.style.left = (e.clientX - 20) + 'px';
-            fruit.style.top = (e.clientY - 50) + 'px';
-            document.body.appendChild(fruit);
-            setTimeout(() => fruit.remove(), 1000);
-        }
-
-        function createFloatText(text, x, y) {
-            const el = document.createElement('div');
-            el.innerText = text;
-            el.style.cssText = `position:absolute; left:${x}px; top:${y}px; color:#FF6B6B; font-weight:bold; font-size:1.5rem; pointer-events:none; animation: floatUp 0.8s forwards; z-index:100;`;
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 800);
-        }
-
-        // [핵심] 보상형 광고 로직
-        function watchAd(type) {
-            if(window.showRewardAd) {
-                window.showRewardAd(() => {
-                    // 광고 시청 완료 후 보상 지급
-                    if(type === 'speed') {
-                        activateSpeedBuff();
-                    } else if(type === 'gold') {
-                        giveGoldReward();
-                    }
-                });
+                game.unlockedMax = idx;
+                updateMoney();
+                renderFruits();
+                // 팡파레 효과음 재생 가능
             } else {
-                alert("광고 시스템 로딩 중...");
+                alert("돈이 부족합니다! 더 열심히 파세요!");
             }
         }
 
-        function activateSpeedBuff() {
-            game.multiplier = 2; // 2배 속도
-            showToast("🔥 부스트 발동! (1분간 수익 2배)");
+        function newCustomer() {
+            // 해금된 과일 중에서 랜덤 주문
+            currentOrder = Math.floor(Math.random() * (game.unlockedMax + 1));
+            
+            // 말풍선 업데이트
+            const targetFruit = FRUITS[currentOrder];
+            document.getElementById('orderBubble').innerHTML = `
+                <img src="../../images/tanghulu/${targetFruit.img}" style="width:30px;"> 주세요!
+            `;
+            
+            // 꼬치 초기화
+            document.getElementById('myStick').innerHTML = "";
+            stickFruits = [];
+        }
+
+        function addToStick(fruitId) {
+            // 꼬치에 과일 추가 시각효과
+            const stick = document.getElementById('myStick');
+            const img = document.createElement('img');
+            img.src = `../../images/tanghulu/${FRUITS[fruitId].img}`;
+            img.className = 'fruit-on-stick';
+            stick.appendChild(img);
+
+            // 정답 확인 (지금은 1개만 꽂으면 바로 판정)
+            if (fruitId === currentOrder) {
+                // 성공!
+                const reward = FRUITS[fruitId].price;
+                game.money += reward;
+                showFeedback("맛있다!", true);
+                try { document.getElementById('sfx-correct').play(); } catch(e){}
+            } else {
+                // 실패
+                showFeedback("우웩!", false);
+                // try { document.getElementById('sfx-wrong').play(); } catch(e){}
+            }
+            
+            updateMoney();
+            saveGame();
+            
+            // 0.5초 뒤 다음 손님
             setTimeout(() => {
-                game.multiplier = 1;
-                showToast("부스트 종료");
-            }, 60000); // 1분 뒤 원상복구
+                newCustomer();
+            }, 500);
         }
 
-        function giveGoldReward() {
-            let reward = 10000 + (game.levels.reduce((a,b)=>a+b, 0) * 1000); // 성장 비례 보상
-            game.money += reward;
-            showToast(`💰 지원금 ${reward.toLocaleString()}원 도착!`);
+        function showFeedback(text, isSuccess) {
+            const el = document.createElement('div');
+            el.className = `feedback ${isSuccess ? 'success' : 'fail'}`;
+            el.innerText = text;
+            el.style.left = '50%';
+            el.style.top = '30%';
+            el.style.transform = 'translateX(-50%)';
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 1000);
         }
 
-        function showToast(msg) {
-            const t = document.getElementById('toast');
-            t.innerText = msg;
-            t.style.display = 'block';
-            t.classList.add('animate__animated', 'animate__fadeInUp');
-            setTimeout(() => t.style.display = 'none', 3000);
+        function updateMoney() {
+            document.getElementById('money').innerText = game.money.toLocaleString();
+        }
+
+        function saveGame() {
+            localStorage.setItem('tanghuluV2', JSON.stringify(game));
+        }
+        
+        function resetGame() {
+            if(confirm("정말 초기화할까요?")) {
+                localStorage.removeItem('tanghuluV2');
+                location.reload();
+            }
         }
     </script>
 </body>
