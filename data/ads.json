@@ -13,6 +13,8 @@
   },
   "gameBottom": {
     "image": "https://via.placeholder.com/320x100",
-    "link": "https://youtube.com"
+    "link": "https://youtube.com",
+    "type": "code",
+    "content": "<ins class=\"kakao_ad_area\" style=\"display:none;\"\ndata-ad-unit = \"DAN-dGsTO46QNfk23tIp\"\ndata-ad-width = \"320\"\ndata-ad-height = \"100\"></ins>\n<script type=\"text/javascript\" src=\"//t1.daumcdn.net/kas/static/ba.min.js\" async></script>"
   }
 }
