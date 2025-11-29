@@ -10,14 +10,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* [디자인 시스템] */
         :root {
-            --primary: #00ff9d;       /* 포인트 컬러 (형광 초록) */
-            --bg-body: #0a0a0f;       /* 더 깊은 다크 배경 */
-            --bg-sidebar: #121218;    /* 사이드바 배경 */
-            --bg-card: #1c1c26;       /* 카드 배경 */
+            --primary: #00ff9d;       
+            --bg-body: #0a0a0f;       
+            --bg-sidebar: #121218;    
+            --bg-card: #1c1c26;       
             --text-main: #ffffff;
-            --text-muted: #888899;    /* 세련된 회색 */
+            --text-muted: #888899;    
             --border: #2a2a35;
         }
 
@@ -26,7 +25,7 @@
             background-color: var(--bg-body);
             color: var(--text-main);
             font-family: 'Noto Sans KR', sans-serif;
-            font-weight: 300; /* 기본 폰트 얇게 */
+            font-weight: 300;
             overflow-x: hidden;
         }
         
@@ -34,7 +33,7 @@
         
         .app-container { display: flex; min-height: 100vh; position: relative; }
 
-        /* --- [1] 사이드바 (프로페셔널 스타일) --- */
+        /* [1] 사이드바 */
         .sidebar {
             width: 260px; background-color: var(--bg-sidebar);
             border-right: 1px solid var(--border);
@@ -45,7 +44,7 @@
         }
         
         .logo {
-            font-family: 'Montserrat', sans-serif; /* 로고 전용 폰트 */
+            font-family: 'Montserrat', sans-serif;
             font-size: 1.8rem; font-weight: 800; letter-spacing: -1px;
             color: var(--text-main); margin-bottom: 50px;
             display: flex; align-items: center; gap: 8px;
@@ -62,17 +61,17 @@
         .menu-item {
             display: flex; align-items: center; padding: 12px 15px;
             color: var(--text-muted); border-radius: 8px;
-            margin-bottom: 5px; font-weight: 400; /* 얇은 폰트 */
+            margin-bottom: 5px; font-weight: 400;
             font-size: 0.95rem;
         }
         .menu-item:hover, .menu-item.active {
             background: rgba(0, 255, 157, 0.05);
             color: var(--primary);
-            font-weight: 500; /* 활성화되면 살짝 두껍게 */
+            font-weight: 500;
         }
         .menu-item i { width: 25px; font-size: 1rem; }
 
-        /* 사이드바 하단 (소셜 & 광고) */
+        /* 사이드바 하단 (여기에만 소셜 아이콘이 있음) */
         .sidebar-footer { margin-top: auto; }
         .social-links { display: flex; gap: 15px; margin-bottom: 20px; padding-left: 5px; }
         .social-btn { color: var(--text-muted); font-size: 1.2rem; }
@@ -82,40 +81,34 @@
             background: #000; overflow: hidden; display: flex; justify-content: center; align-items: center;
         }
 
-        /* --- [2] 메인 컨텐츠 --- */
+        /* [2] 메인 컨텐츠 */
         .main-content {
             flex: 1; margin-left: 260px; padding: 40px 60px;
             max-width: 1600px;
+            display: flex; flex-direction: column; /* 세로 정렬 */
+            min-height: 100vh;
         }
         
-        /* 헤더 (검색 & 알림) */
         .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
         .menu-toggle { display: none; font-size: 1.5rem; color: white; background: none; border: none; cursor: pointer; }
         
-        .search-container {
-            position: relative; width: 400px;
-        }
+        .search-container { position: relative; width: 400px; }
         .search-bar {
             background: var(--bg-card); padding: 14px 20px; border-radius: 50px;
             display: flex; align-items: center; border: 1px solid var(--border);
             transition: 0.3s;
         }
-        .search-bar:focus-within {
-            border-color: var(--primary);
-            box-shadow: 0 0 15px rgba(0, 255, 157, 0.15);
-        }
+        .search-bar:focus-within { border-color: var(--primary); box-shadow: 0 0 15px rgba(0, 255, 157, 0.15); }
         .search-bar input {
             background: none; border: none; color: white; margin-left: 10px; width: 100%;
             outline: none; font-size: 0.95rem; font-weight: 300;
         }
 
-        /* 히어로 섹션 */
         .hero-section {
             width: 100%; height: 320px; border-radius: 20px; position: relative;
             margin-bottom: 40px; display: flex; align-items: center; padding: 0 60px;
             background-size: cover; background-position: center;
             overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            /* 기본 배경색 (이미지 로딩 전) */
             background-color: #1a1a2e;
         }
         .hero-overlay {
@@ -134,14 +127,12 @@
         .hero-title span { color: var(--primary); }
         .hero-desc { font-size: 1.1rem; color: #ccc; font-weight: 300; line-height: 1.6; }
 
-        /* 상단 배너 */
         .top-ad-banner {
             width: 100%; height: 100px; border-radius: 12px; margin-bottom: 50px;
             border: 1px solid var(--border); background: #000;
             display: flex; justify-content: center; align-items: center; overflow: hidden;
         }
 
-        /* 섹션 제목 */
         .section-header {
             display: flex; align-items: center; gap: 10px; margin-bottom: 25px;
             border-bottom: 1px solid var(--border); padding-bottom: 15px;
@@ -149,51 +140,48 @@
         .section-title { font-size: 1.4rem; font-weight: 700; color: white; margin: 0; }
         .section-line { height: 3px; width: 30px; background: var(--primary); border-radius: 2px; }
 
-        /* 게임 그리드 */
-        .game-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px;
-        }
+        .game-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; margin-bottom: 50px; }
         .game-card {
             background-color: var(--bg-card); border-radius: 16px; overflow: hidden;
             border: 1px solid transparent; cursor: pointer; transition: 0.3s;
             display: flex; flex-direction: column; height: 100%;
         }
         .game-card:hover {
-            transform: translateY(-8px);
-            border-color: var(--primary);
+            transform: translateY(-8px); border-color: var(--primary);
             box-shadow: 0 10px 30px rgba(0, 255, 157, 0.1);
         }
-        .thumb-wrapper {
-            position: relative; padding-top: 100%; /* 1:1 비율 */
-            background: #151525; overflow: hidden;
-        }
-        .thumb-wrapper img {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            object-fit: cover; transition: 0.5s;
-        }
+        .thumb-wrapper { position: relative; padding-top: 100%; background: #151525; overflow: hidden; }
+        .thumb-wrapper img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
         .game-card:hover .thumb-wrapper img { transform: scale(1.1); }
         .game-info { padding: 15px; flex: 1; display: flex; flex-direction: column; }
         .game-title { font-size: 1rem; font-weight: 500; margin: 0 0 5px 0; }
         .game-tags { font-size: 0.75rem; color: var(--text-muted); font-weight: 300; }
 
-        /* [NEW] 비즈니스 푸터 */
+        /* [수정됨] 비즈니스 푸터 (간격 대폭 확보 및 아이콘 제거) */
         .site-footer {
-            margin-top: 80px; padding-top: 40px; border-top: 1px solid var(--border);
-            color: var(--text-muted); font-size: 0.85rem; font-weight: 300;
+            margin-top: auto; /* 맨 아래로 밀기 */
+            padding-top: 60px; /* 위쪽 여백 충분히 */
+            padding-bottom: 40px;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted); 
+            font-size: 0.85rem; 
+            font-weight: 300;
         }
         .footer-content {
             display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 30px;
         }
         .footer-brand h3 { color: white; margin: 0 0 10px 0; font-family: 'Montserrat', sans-serif; }
-        .footer-links { display: flex; gap: 20px; }
+        
+        /* 텍스트 링크만 깔끔하게 */
+        .footer-links { display: flex; gap: 30px; flex-wrap: wrap;}
+        .footer-links a { color: var(--text-muted); transition: 0.2s; }
         .footer-links a:hover { color: var(--primary); text-decoration: underline; }
-        .copyright { margin-top: 30px; text-align: center; opacity: 0.6; font-size: 0.75rem; }
+        
+        .copyright { margin-top: 40px; text-align: left; opacity: 0.5; font-size: 0.75rem; }
 
-        /* 모바일 오버레이 */
         .menu-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 900; display: none; backdrop-filter: blur(5px); }
         .menu-overlay.active { display: block; }
 
-        /* 반응형 (모바일) */
         @media (max-width: 768px) {
             .sidebar { transform: translateX(-100%); width: 280px; box-shadow: 10px 0 30px rgba(0,0,0,0.5); }
             .sidebar.active { transform: translateX(0); }
@@ -204,7 +192,12 @@
             .hero-title { font-size: 2.2rem; }
             .hero-content { max-width: 100%; }
             .game-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
-            .footer-content { flex-direction: column; align-items: center; text-align: center; }
+            
+            /* 모바일 푸터 정렬 */
+            .site-footer { margin-top: 40px; padding-top: 40px; text-align: center; }
+            .footer-content { flex-direction: column; align-items: center; justify-content: center; }
+            .footer-links { justify-content: center; gap: 15px; }
+            .copyright { text-align: center; margin-top: 30px; }
         }
     </style>
 </head>
@@ -235,10 +228,10 @@
             <div class="sidebar-footer">
                 <div class="menu-title">Follow Us</div>
                 <div class="social-links">
-                    <a href="https://instagram.com" target="_blank" class="social-btn"><i class="fa-brands fa-instagram"></i></a>
-                    <a href="https://youtube.com" target="_blank" class="social-btn"><i class="fa-brands fa-youtube"></i></a>
-                    <a href="https://github.com/fun-let" target="_blank" class="social-btn"><i class="fa-brands fa-github"></i></a>
-                    <a href="mailto:contact@funlet.io" class="social-btn"><i class="fa-solid fa-envelope"></i></a>
+                    <a href="#" class="social-btn"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="#" class="social-btn"><i class="fa-brands fa-youtube"></i></a>
+                    <a href="#" class="social-btn"><i class="fa-brands fa-github"></i></a>
+                    <a href="./contact.html" class="social-btn"><i class="fa-solid fa-envelope"></i></a>
                 </div>
                 <div class="sidebar-ad" id="ad-sidebar"></div>
             </div>
@@ -256,10 +249,6 @@
                             <input type="text" id="searchInput" placeholder="Search games...">
                         </div>
                     </div>
-                </div>
-                <div style="display:flex; gap:20px; align-items:center; display:none; /* 모바일 공간 부족으로 일단 숨김 */ @media(min-width:768px){display:flex;}">
-                    <i class="fa-regular fa-bell" style="font-size:1.2rem; color:var(--text-muted); cursor:pointer;"></i>
-                    <div style="width:35px; height:35px; background:linear-gradient(45deg, var(--primary), #00ccff); border-radius:50%;"></div>
                 </div>
             </header>
 
@@ -281,17 +270,19 @@
             
             <div class="game-grid" id="gameGrid"></div>
 
-           <div class="footer-links">
-    <a href="./terms.html">서비스 이용약관</a> 
-    <a href="./privacy.html">개인정보처리방침</a>
-    <a href="./contact.html">제휴/광고 문의</a>
-    <a href="#">개발자 지원</a>
-</div>
-
-<div class="social-links">
-    <a href="https://instagram.com/funletofficial" target="_blank" class="social-btn"><i class="fa-brands fa-instagram"></i></a>
-    ...
-</div>
+            <footer class="site-footer">
+                <div class="footer-content">
+                    <div class="footer-brand">
+                        <h3>FUNLET Platform</h3>
+                        <p>Global Hyper-Casual Game Station.<br>Play Anywhere, Anytime.</p>
+                    </div>
+                    <div class="footer-links">
+                        <a href="#">서비스 이용약관</a>
+                        <a href="#">개인정보처리방침</a>
+                        <a href="./contact.html">제휴/광고 문의</a>
+                        <a href="#">개발자 지원</a>
+                    </div>
+                </div>
                 <p class="copyright">Copyright © 2025 FUNLET Corp. All rights reserved.</p>
             </footer>
         </main>
@@ -304,8 +295,6 @@
 
         window.onload = async function() {
             const time = new Date().getTime();
-            
-            // 카테고리 로드
             try {
                 const catRes = await fetch(`./data/categories.json?v=${time}`);
                 if(catRes.ok) {
@@ -314,7 +303,6 @@
                 }
             } catch(e) {}
 
-            // 게임 로드
             try {
                 const gameRes = await fetch(`./data/games.json?v=${time}`);
                 if(gameRes.ok) {
@@ -326,13 +314,10 @@
             } catch(e) {}
         };
 
-        // [수정됨] 이모지 제거 & 심플한 메뉴 렌더링
         function renderMenu(categories) {
             const menuContainer = document.getElementById('categoryMenu');
             let html = '';
             categories.forEach(cat => {
-                // 아이콘 클래스(fa-...)가 있으면 쓰고, 없으면 기본 점(circle) 아이콘 사용
-                // 이름 옆에 붙은 이모지는 표시하지 않음 (순수 텍스트만)
                 const iconClass = cat.icon || "fa-solid fa-circle-small"; 
                 html += `
                 <a href="#" onclick="filterGames('${cat.id}')" class="menu-item">
@@ -407,4 +392,3 @@
     </script>
 </body>
 </html>
-
