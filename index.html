@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
         :root { --primary: #00ff9d; --bg-body: #0f0f1a; --bg-sidebar: #151525; --bg-card: #1e1e2f; --text-main: #ffffff; --text-muted: #8f8fba; }
         body { margin: 0; padding: 0; background-color: var(--bg-body); color: var(--text-main); font-family: 'Noto Sans KR', sans-serif; overflow-x: hidden; }
@@ -33,11 +34,12 @@
         .hero-desc { font-size: 1.1rem; color: #ccc; }
         .top-ad-banner { width: 100%; height: 100px; border-radius: 15px; margin-bottom: 40px; border: 1px solid #2a2a40; }
         .game-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 30px; }
-        .game-card { background-color: var(--bg-card); border-radius: 20px; overflow: hidden; text-decoration: none; color: white; display: block; border: 1px solid rgba(255,255,255,0.05); }
+        .game-card { background-color: var(--bg-card); border-radius: 20px; overflow: hidden; text-decoration: none; color: white; display: block; border: 1px solid rgba(255,255,255,0.05); cursor: pointer;}
         .thumb-wrapper { position: relative; padding-top: 100%; background: #151525; }
         .thumb-wrapper img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
         .game-info { padding: 20px; }
         .footer { padding: 30px; text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 50px; border-top: 1px solid #2a2a40; }
+        
         @media (max-width: 768px) {
             .sidebar { transform: translateX(-100%); width: 250px; } .sidebar.active { transform: translateX(0); } .menu-toggle { display: block; }
             .main-content { margin-left: 0; padding: 20px; } .search-bar { width: 100%; } .hero-section { padding: 20px; height: 250px; } .hero-title { font-size: 2rem; } .game-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
@@ -51,11 +53,14 @@
             <a href="./index.html" class="logo"><i class="fa-solid fa-gamepad"></i> FUNLET</a>
             <button onclick="toggleMenu()" style="position:absolute; top:20px; right:20px; background:none; border:none; color:white; font-size:1.5rem; cursor:pointer; display:none;" id="closeBtn"><i class="fa-solid fa-xmark"></i></button>
             <div class="menu-label">MENU</div>
-            <a href="./index.html" class="menu-item active"><i class="fa-solid fa-house"></i> 홈</a>
+            <a href="#" onclick="filterGames('all')" class="menu-item active"><i class="fa-solid fa-house"></i> 홈</a>
+            
             <div class="menu-label" style="margin-top: 20px;">CATEGORY</div>
-            <a href="./category/idle.html" class="menu-item"><i class="fa-solid fa-sack-dollar"></i> 키우기/IDLE</a>
-            <a href="./category/simulation.html" class="menu-item"><i class="fa-solid fa-paw"></i> 시뮬레이션/뽑기</a>
-            <a href="./category/action.html" class="menu-item"><i class="fa-solid fa-rocket"></i> 액션/아케이드</a>
+            <a href="#" onclick="filterGames('idle')" class="menu-item"><i class="fa-solid fa-sack-dollar"></i> 키우기/IDLE</a>
+            <a href="#" onclick="filterGames('simulation')" class="menu-item"><i class="fa-solid fa-paw"></i> 시뮬레이션/뽑기</a>
+            <a href="#" onclick="filterGames('action')" class="menu-item"><i class="fa-solid fa-rocket"></i> 액션/아케이드</a>
+            <a href="#" onclick="filterGames('social')" class="menu-item"><i class="fa-solid fa-heart"></i> 소셜/심리</a>
+            
             <div class="sidebar-ad" id="ad-sidebar"></div>
         </nav>
         <main class="main-content">
@@ -67,9 +72,6 @@
                         <input type="text" id="searchInput" placeholder="게임 검색...">
                     </div>
                 </div>
-                <div style="display:flex; gap:15px; align-items:center; margin-left:15px;">
-                    <div style="width:35px; height:35px; background:var(--primary); border-radius:50%;"></div>
-                </div>
             </header>
             <section class="hero-section" id="hero-section">
                  <div class="hero-overlay"></div>
@@ -80,56 +82,101 @@
             </section>
             <div class="top-ad-banner" id="ad-main-top"></div>
             
-            <h2 style="font-family:'Black Han Sans'; font-size:1.5rem; margin-bottom:20px; color:white;">🔥 인기 게임</h2>
+            <h2 id="pageTitle" style="font-family:'Black Han Sans'; font-size:1.5rem; margin-bottom:20px; color:white;">🔥 전체 게임 목록</h2>
             
-            <div class="game-grid" id="gameGrid">
-                <a href="./games/money-clicker/index.html" class="game-card" data-title="머니 타이쿤 money tycoon">
-                    <div class="thumb-wrapper"><img src="./images/thumbnails/money_tycoon_thumb.jpg"></div>
-                    <div class="game-info"><h3>Money Tycoon</h3><span style="font-size:0.8rem; color:#888;">IDLE / 키우기</span></div>
-                </a>
-                <a href="./games/pet-gacha/index.html" class="game-card" data-title="펫 뽑기 pet gacha">
-                    <div class="thumb-wrapper"><img src="./images/pet-gacha/pet_gacha_thumb.jpg"></div>
-                    <div class="game-info"><h3>Pet Gacha</h3><span style="font-size:0.8rem; color:#888;">Simulation / 뽑기</span></div>
-                </a>
-<a href="./games/telepathy/index.html" class="game-card" data-title="우정 텔레파시 telepathy test">
-    <div class="thumb-wrapper">
-        <img src="./images/telepathy/telepathy_thumb.jpg" onerror="this.src='https://via.placeholder.com/300x300?text=Telepathy'">
-    </div>
-    <div class="game-info">
-        <h3 style="margin:0;">우정 텔레파시</h3>
-        <span style="font-size:0.8rem; color:#888;">Social / 심리테스트</span>
-    </div>
-</a>
-       
-                <a href="./games/sky-jump/index.html" class="game-card" data-title="스카이 점프 sky jump">
-                    <div class="thumb-wrapper"><img src="./images/sky-jump/sky_thumb.jpg"></div>
-                    <div class="game-info"><h3>Sky Jump</h3><span style="font-size:0.8rem; color:#888;">Action / 점프맵</span></div>
-                </a>
-            </div>
+            <div class="game-grid" id="gameGrid"></div>
+
             <footer class="footer">Copyright © 2025 FUNLET Platform. All rights reserved.</footer>
         </main>
     </div>
+    
     <script src="./js/ads.js"></script>
     <script>
-        function toggleMenu() {
+        // 전역 변수
+        let allGames = [];
+
+        // 페이지 로드 시 게임 데이터 불러오기
+        window.onload = async function() {
+            const time = new Date().getTime();
+            try {
+                const res = await fetch(`./data/games.json?v=${time}`);
+                allGames = await res.json();
+                renderGames(allGames);
+            } catch(e) {
+                console.error("게임 목록 로드 실패:", e);
+                document.getElementById('gameGrid').innerHTML = '<p style="color:white;">게임 목록을 불러오지 못했습니다.</p>';
+            }
+        };
+
+        // 게임 그리기 함수
+        function renderGames(games) {
+            const grid = document.getElementById('gameGrid');
+            grid.innerHTML = "";
+            
+            if(games.length === 0) {
+                grid.innerHTML = '<p style="color:#888;">표시할 게임이 없습니다.</p>';
+                return;
+            }
+
+            games.forEach(game => {
+                const html = `
+                <a href="./games/${game.id}/index.html" class="game-card">
+                    <div class="thumb-wrapper">
+                        <img src="${game.thumb}" onerror="this.src='https://via.placeholder.com/300x300?text=No+Image'">
+                    </div>
+                    <div class="game-info">
+                        <h3 style="margin:0;">${game.title}</h3>
+                        <span style="font-size:0.8rem; color:#888;">${game.desc}</span>
+                    </div>
+                </a>
+                `;
+                grid.innerHTML += html;
+            });
+        }
+
+        // 카테고리 필터링
+        function filterGames(category) {
+            // 메뉴 활성화 표시
+            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            
+            // 모바일 메뉴 닫기
+            toggleMenu(false);
+
+            if(category === 'all') {
+                document.getElementById('pageTitle').innerText = "🔥 전체 게임 목록";
+                renderGames(allGames);
+            } else {
+                const filtered = allGames.filter(g => g.category === category);
+                document.getElementById('pageTitle').innerText = `📂 ${category.toUpperCase()} 게임`;
+                renderGames(filtered);
+            }
+        }
+
+        function toggleMenu(forceState) {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.querySelector('.menu-overlay');
             const closeBtn = document.getElementById('closeBtn');
-            sidebar.classList.toggle('active');
-            overlay.classList.toggle('active');
+            
+            if (forceState === false) {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            } else {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+            }
             closeBtn.style.display = sidebar.classList.contains('active') ? 'block' : 'none';
         }
+
+        // 검색 기능
         const searchInput = document.getElementById('searchInput');
-        const games = document.getElementsByClassName('game-card');
         searchInput.addEventListener('keyup', function(e) {
             const term = e.target.value.toLowerCase();
-            Array.from(games).forEach(game => {
-                const title = game.getAttribute('data-title').toLowerCase();
-                game.style.display = title.includes(term) ? 'block' : 'none';
-            });
+            const filtered = allGames.filter(g => 
+                g.title.toLowerCase().includes(term) || g.desc.toLowerCase().includes(term)
+            );
+            renderGames(filtered);
         });
     </script>
 </body>
 </html>
-
-
