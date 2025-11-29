@@ -182,18 +182,28 @@
         .menu-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 900; display: none; backdrop-filter: blur(5px); }
         .menu-overlay.active { display: block; }
 
+/* [모바일 반응형 스타일 수정본] */
         @media (max-width: 768px) {
             .sidebar { transform: translateX(-100%); width: 280px; box-shadow: 10px 0 30px rgba(0,0,0,0.5); }
             .sidebar.active { transform: translateX(0); }
             .main-content { margin-left: 0; padding: 20px; }
             .menu-toggle { display: block; }
             .search-container { width: 100%; }
-            .hero-section { padding: 30px; height: 280px; }
-            .hero-title { font-size: 2.2rem; }
-            .hero-content { max-width: 100%; }
-            .game-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
             
-            /* 모바일 푸터 정렬 */
+            /* 히어로 섹션 높이 조절 */
+            .hero-section { padding: 30px; height: 250px; }
+            .hero-title { font-size: 2rem; }
+            .hero-content { max-width: 100%; }
+            
+            /* [핵심 수정] 게임 그리드: 무조건 2열로 세로 나열 (가로 스크롤 X) */
+            .game-grid { 
+                display: grid; 
+                grid-template-columns: repeat(2, 1fr); /* 2칸씩 꽉 채우기 */
+                gap: 15px; 
+                overflow-x: hidden; /* 가로 스크롤 방지 */
+            }
+            
+            /* 모바일 푸터 */
             .site-footer { margin-top: 40px; padding-top: 40px; text-align: center; }
             .footer-content { flex-direction: column; align-items: center; justify-content: center; }
             .footer-links { justify-content: center; gap: 15px; }
@@ -392,3 +402,4 @@
     </script>
 </body>
 </html>
+
