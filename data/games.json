@@ -33,5 +33,12 @@
     "category": "puzzle",
     "desc": "퍼즐",
     "thumb": "images/thumbnails/space-merge_thumb.jpg"
+  },
+  {
+    "id": "tanghulu-master",
+    "title": "탕후루 마스터",
+    "category": "idle",
+    "desc": "키우기/IDLE",
+    "thumb": ""
   }
 ]
