@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Space Merge - 행성 합치기</title>
+    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    
+    <style>
+        body { 
+            margin: 0; padding: 0; background: #0f0f1a; overflow: hidden; 
+            font-family: 'Black Han Sans', sans-serif; touch-action: none;
+            display: flex; justify-content: center; align-items: center; height: 100vh;
+        }
+        
+        #gameContainer {
+            position: relative; width: 100%; max-width: 450px; height: 100vh;
+            background: #161626; overflow: hidden;
+            border-left: 2px solid #333; border-right: 2px solid #333;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+        }
+
+        /* UI 레이어 */
+        .ui-header {
+            position: absolute; top: 0; left: 0; width: 100%; padding: 15px;
+            display: flex; justify-content: space-between; align-items: flex-start;
+            box-sizing: border-box; z-index: 10; pointer-events: none;
+        }
+
+        .score-box {
+            color: white; text-shadow: 2px 2px 0 #000;
+        }
+        .score-label { font-size: 0.8rem; color: #aaa; }
+        .score-val { font-size: 2.5rem; color: #00ff9d; margin-top: -5px; display: block;}
+
+        .next-box {
+            text-align: right;
+        }
+        .next-preview {
+            width: 60px; height: 60px; background: rgba(255,255,255,0.1);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            border: 2px solid #444; margin-top: 5px;
+        }
+        .next-preview img { max-width: 80%; max-height: 80%; }
+
+        /* 게임 오버 화면 */
+        #gameOverScreen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); z-index: 50; display: none;
+            flex-direction: column; align-items: center; justify-content: center;
+            color: white; text-align: center;
+        }
+        .btn {
+            background: #00ff9d; color: black; border: none; padding: 15px 40px;
+            font-size: 1.5rem; border-radius: 50px; cursor: pointer;
+            font-family: 'Black Han Sans'; margin-top: 20px;
+            box-shadow: 0 5px 0 #00b870; transition: 0.2s; pointer-events: auto;
+        }
+        .btn:active { transform: translateY(5px); box-shadow: none; }
+
+        /* 광고 영역 */
+        .ad-area {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 100px;
+            background: rgba(0,0,0,0.5); z-index: 20; pointer-events: auto;
+            display: flex; justify-content: center; align-items: center;
+        }
+        
+        /* 상단 경계선 (여기 넘으면 게임오버) */
+        .dead-line {
+            position: absolute; top: 120px; left: 0; width: 100%; height: 2px;
+            background: repeating-linear-gradient(90deg, transparent, transparent 10px, #ff4757 10px, #ff4757 20px);
+            opacity: 0.5; z-index: 5;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="gameContainer">
+        <div class="dead-line"></div>
+        
+        <div class="ui-header">
+            <div class="score-box">
+                <span class="score-label">SCORE</span>
+                <span class="score-val" id="scoreDisplay">0</span>
+            </div>
+            <div class="next-box">
+                <span class="score-label">NEXT</span>
+                <div class="next-preview">
+                    <img id="nextImg" src="">
+                </div>
+            </div>
+        </div>
+
+        <div id="gameOverScreen">
+            <h1 style="color:#ff4757; font-size:3.5rem; margin:0;">GAME OVER</h1>
+            <p style="font-size:1.5rem; margin-top:10px;">최종 점수: <span id="finalScore">0</span></p>
+            <button class="btn" onclick="location.reload()">다시 도전</button>
+            <a href="../../index.html" style="color:#aaa; margin-top:30px; display:block; text-decoration:none;">홈으로 나가기</a>
+        </div>
+
+        <div id="world"></div>
+
+        <div class="ad-area" id="ad-game-bottom"></div>
+    </div>
+
+    <audio id="bgm" src="../../audio/space-merge/bgm_space.mp3" loop></audio>
+    <audio id="sfx-drop" src="../../audio/space-merge/sfx_drop.mp3"></audio>
+    <audio id="sfx-merge" src="../../audio/space-merge/sfx_merge.mp3"></audio>
+
+    <script src="../../js/ads.js"></script>
+
+    <script>
+        // Matter.js 모듈 별칭
+        const Engine = Matter.Engine,
+              Render = Matter.Render,
+              Runner = Matter.Runner,
+              Bodies = Matter.Bodies,
+              Composite = Matter.Composite,
+              Events = Matter.Events,
+              World = Matter.World;
+
+        // 게임 설정
+        const PLANETS = [
+            { radius: 20, score: 10,  color: '#ffcccc', img: 'planet_0.png' }, // 0
+            { radius: 30, score: 20,  color: '#ff9999', img: 'planet_1.png' }, // 1
+            { radius: 40, score: 40,  color: '#ff6666', img: 'planet_2.png' }, // 2
+            { radius: 50, score: 80,  color: '#ff3333', img: 'planet_3.png' }, // 3
+            { radius: 65, score: 160, color: '#cc0000', img: 'planet_4.png' }, // 4
+            { radius: 80, score: 320, color: '#ffff99', img: 'planet_5.png' }, // 5
+            { radius: 95, score: 640, color: '#ffff66', img: 'planet_6.png' }, // 6
+            { radius: 110, score: 1280, color: '#ffff33', img: 'planet_7.png' }, // 7
+            { radius: 125, score: 2560, color: '#00ccff', img: 'planet_8.png' }, // 8
+            { radius: 140, score: 5120, color: '#0066ff', img: 'planet_9.png' }, // 9
+            { radius: 155, score: 10000, color: '#0000ff', img: 'planet_10.png'} // 10
+        ];
+
+        const container = document.getElementById('gameContainer');
+        const width = container.clientWidth;
+        const height = container.clientHeight;
+        
+        let score = 0;
+        let nextPlanetIndex = 0;
+        let currentBody = null;
+        let canDrop = true;
+        let isGameOver = false;
+
+        // 엔진 생성
+        const engine = Engine.create();
+        const world = engine.world;
+
+        // 렌더러 생성
+        const render = Render.create({
+            element: document.getElementById('world'),
+            engine: engine,
+            options: {
+                width: width,
+                height: height,
+                wireframes: false,
+                background: 'transparent' // 배경은 CSS로 처리
+            }
+        });
+
+        // 벽 생성 (바닥, 좌, 우)
+        const wallOptions = { isStatic: true, render: { fillStyle: '#222' } };
+        const ground = Bodies.rectangle(width/2, height, width, 60, wallOptions); // 바닥 (광고 영역 뒤)
+        const leftWall = Bodies.rectangle(0, height/2, 10, height, wallOptions);
+        const rightWall = Bodies.rectangle(width, height/2, 10, height, wallOptions);
+        
+        World.add(world, [ground, leftWall, rightWall]);
+
+        Render.run(render);
+        const runner = Runner.create();
+        Runner.run(runner, engine);
+
+        // 첫 행성 준비
+        setNextPlanet();
+        createNewPlanet();
+
+        // 입력 이벤트 (마우스/터치)
+        const inputHandler = (x) => {
+            if(isGameOver || !canDrop) return;
+            
+            // 위치 제한 (벽 안으로)
+            const limit = PLANETS[nextPlanetIndex].radius;
+            if(x < limit) x = limit;
+            if(x > width - limit) x = width - limit;
+
+            if(currentBody) {
+                Matter.Body.setPosition(currentBody, { x: x, y: 50 });
+            }
+        };
+
+        const dropHandler = () => {
+            if(isGameOver || !canDrop || !currentBody) return;
+            
+            // 떨어뜨리기
+            canDrop = false;
+            currentBody.isSleeping = false; // 물리 엔진 활성화
+            
+            // 소리 재생 시도
+            try { 
+                const bgm = document.getElementById('bgm');
+                if(bgm.paused) { bgm.volume=0.3; bgm.play(); }
+                document.getElementById('sfx-drop').play();
+            } catch(e){}
+
+            currentBody = null;
+
+            // 0.5초 뒤에 다음 행성 준비
+            setTimeout(() => {
+                if(!isGameOver) createNewPlanet();
+            }, 500);
+        };
+
+        // 이벤트 리스너 등록
+        container.addEventListener('mousemove', e => inputHandler(e.offsetX));
+        container.addEventListener('touchmove', e => { e.preventDefault(); inputHandler(e.touches[0].clientX - container.getBoundingClientRect().left); }, {passive:false});
+        
+        container.addEventListener('mouseup', dropHandler);
+        container.addEventListener('touchend', dropHandler);
+
+        // 충돌 이벤트 (합체 로직)
+        Events.on(engine, 'collisionStart', (event) => {
+            const pairs = event.pairs;
+            
+            pairs.forEach(pair => {
+                const bodyA = pair.bodyA;
+                const bodyB = pair.bodyB;
+
+                // 같은 레벨의 행성끼리 충돌했는지 확인
+                if (bodyA.level !== undefined && bodyB.level !== undefined && bodyA.level === bodyB.level) {
+                    // 이미 제거된 물체면 패스
+                    if(!World.get(world, bodyA.id) || !World.get(world, bodyB.id)) return;
+
+                    const level = bodyA.level;
+                    if(level < PLANETS.length - 1) {
+                        // 합체 위치 (두 물체의 중간)
+                        const midX = (bodyA.position.x + bodyB.position.x) / 2;
+                        const midY = (bodyA.position.y + bodyB.position.y) / 2;
+
+                        // 기존 물체 제거
+                        World.remove(world, [bodyA, bodyB]);
+                        
+                        // 새 물체 생성 (한 단계 위)
+                        addPlanet(midX, midY, level + 1, false);
+                        
+                        // 점수 증가
+                        score += PLANETS[level].score;
+                        document.getElementById('scoreDisplay').innerText = score;
+                        
+                        // 합체 소리
+                        const sfx = document.getElementById('sfx-merge');
+                        sfx.currentTime = 0; sfx.play();
+                    }
+                }
+            });
+        });
+
+        // 게임 오버 체크 (1초마다)
+        setInterval(() => {
+            if(isGameOver) return;
+            // 상단 라인(y=120)을 넘은 정지된(sleeping이 아닌) 물체가 있는지 확인
+            const bodies = Composite.allBodies(world);
+            for(let body of bodies) {
+                if(!body.isStatic && body.position.y < 120 && body.velocity.y > -0.1 && body.velocity.y < 0.1 && body !== currentBody) {
+                    // 잠깐 튀어오른 건지 확인하기 위해 속도 체크
+                    gameOver();
+                    break;
+                }
+            }
+        }, 1000);
+
+        function setNextPlanet() {
+            // 0~3번까지만 랜덤 등장
+            nextPlanetIndex = Math.floor(Math.random() * 4);
+            const p = PLANETS[nextPlanetIndex];
+            // 이미지 미리보기
+            document.getElementById('nextImg').src = `../../images/space-merge/${p.img}`;
+            document.getElementById('nextImg').onerror = function() { this.src = `https://via.placeholder.com/50/${p.color.replace('#','')}/ffffff?text=${nextPlanetIndex}`; };
+        }
+
+        function createNewPlanet() {
+            // 현재 대기 중인 행성을 상단에 생성
+            const p = PLANETS[nextPlanetIndex];
+            
+            // 미리보기에 있던 걸 가져옴
+            currentBody = Bodies.circle(width/2, 50, p.radius, {
+                label: 'planet',
+                isSleeping: true, // 떨어지기 전엔 물리 영향 안 받음
+                restitution: 0.2, // 탄성
+                render: {
+                    sprite: {
+                        texture: `../../images/space-merge/${p.img}`,
+                        xScale: (p.radius * 2) / 500, // 이미지 크기 보정 (예시)
+                        yScale: (p.radius * 2) / 500
+                    },
+                    fillStyle: p.color // 이미지가 없으면 색상 표시
+                }
+            });
+            // 텍스처 스케일 조정 (이미지 사이즈에 맞춰 자동 조정이 어려우므로, 이미지를 500px로 가정하고 축소)
+            // 실제 구현 시엔 이미지 사이즈를 맞추거나 Matter.js 스케일링 로직 정교화 필요.
+            // 여기선 심플하게 반지름에 맞춤
+            if(currentBody.render.sprite) {
+               currentBody.render.sprite.xScale = (p.radius * 2) / 100; // 가정: 원본이미지 100px
+               currentBody.render.sprite.yScale = (p.radius * 2) / 100; 
+            }
+
+            currentBody.level = nextPlanetIndex;
+            World.add(world, currentBody);
+            canDrop = true;
+
+            // 다음 행성 미리 준비
+            setNextPlanet();
+        }
+
+        function addPlanet(x, y, level, isStatic) {
+            const p = PLANETS[level];
+            const body = Bodies.circle(x, y, p.radius, {
+                label: 'planet',
+                isStatic: isStatic,
+                restitution: 0.2,
+                render: {
+                    sprite: {
+                        texture: `../../images/space-merge/${p.img}`,
+                        xScale: (p.radius * 2) / 100, 
+                        yScale: (p.radius * 2) / 100
+                    },
+                    fillStyle: p.color
+                }
+            });
+            body.level = level;
+            World.add(world, body);
+        }
+
+        function gameOver() {
+            isGameOver = true;
+            document.getElementById('finalScore').innerText = score;
+            document.getElementById('gameOverScreen').style.display = 'flex';
+            document.getElementById('bgm').pause();
+        }
+        
+        // 반응형 리사이즈
+        window.addEventListener('resize', () => {
+            // Matter.js는 리사이즈가 까다로워 여기선 단순히 새로고침 유도 권장
+        });
+
+    </script>
+</body>
+</html>
